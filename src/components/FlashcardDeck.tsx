@@ -1,0 +1,183 @@
+import { useState } from 'react';
+import { Flashcard } from '@/types/flashcard';
+import { FlashcardComponent } from './FlashcardComponent';
+import { CreateFlashcardModal } from './CreateFlashcardModal';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { ChevronLeft, ChevronRight, Plus, RotateCcw } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+interface FlashcardDeckProps {
+  flashcards: Flashcard[];
+  onUpdateFlashcards: (flashcards: Flashcard[]) => void;
+}
+
+export function FlashcardDeck({ flashcards, onUpdateFlashcards }: FlashcardDeckProps) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const { toast } = useToast();
+
+  const currentCard = flashcards[currentIndex];
+  const progress = flashcards.length > 0 ? ((currentIndex + 1) / flashcards.length) * 100 : 0;
+
+  const handleNext = () => {
+    if (currentIndex < flashcards.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      setCurrentIndex(0); // Loop back to first card
+      toast({
+        title: "Deck complete!",
+        description: "You've reviewed all cards. Starting over."
+      });
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    } else {
+      setCurrentIndex(flashcards.length - 1); // Loop to last card
+    }
+  };
+
+  const handleCreateFlashcard = (newCard: Omit<Flashcard, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const flashcard: Flashcard = {
+      ...newCard,
+      id: Date.now().toString(),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    const updatedFlashcards = [...flashcards, flashcard];
+    onUpdateFlashcards(updatedFlashcards);
+  };
+
+  const handleEditFlashcard = (flashcard: Flashcard) => {
+    // For now, just show a toast - edit modal can be implemented later
+    toast({
+      title: "Edit feature",
+      description: "Edit functionality coming soon!"
+    });
+  };
+
+  const handleDeleteFlashcard = (flashcard: Flashcard) => {
+    const updatedFlashcards = flashcards.filter(card => card.id !== flashcard.id);
+    onUpdateFlashcards(updatedFlashcards);
+    
+    // Adjust current index if needed
+    if (currentIndex >= updatedFlashcards.length && updatedFlashcards.length > 0) {
+      setCurrentIndex(updatedFlashcards.length - 1);
+    } else if (updatedFlashcards.length === 0) {
+      setCurrentIndex(0);
+    }
+    
+    toast({
+      title: "Flashcard deleted",
+      description: "The flashcard has been removed from your deck."
+    });
+  };
+
+  const handleRestart = () => {
+    setCurrentIndex(0);
+    toast({
+      title: "Restarted",
+      description: "Back to the first card!"
+    });
+  };
+
+  if (flashcards.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gradient-subtle">
+        <div className="text-center space-y-6">
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold text-foreground">Welcome to Flashcards</h2>
+            <p className="text-muted-foreground">
+              Create your first flashcard to start studying
+            </p>
+          </div>
+          
+          <CreateFlashcardModal 
+            onCreateFlashcard={handleCreateFlashcard}
+            trigger={
+              <Button size="lg" className="btn-primary touch-target">
+                <Plus className="h-5 w-5 mr-2" />
+                Create First Flashcard
+              </Button>
+            }
+          />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative min-h-screen bg-gradient-subtle">
+      {/* Header */}
+      <div className="fixed top-0 left-0 right-0 z-10 bg-background/80 backdrop-blur-sm border-b">
+        <div className="flex items-center justify-between p-4">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm font-medium">
+              {currentIndex + 1} of {flashcards.length}
+            </span>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleRestart}
+              className="touch-target"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </Button>
+            
+            <CreateFlashcardModal onCreateFlashcard={handleCreateFlashcard} />
+          </div>
+        </div>
+        
+        <Progress value={progress} className="h-1" />
+      </div>
+
+      {/* Main Content */}
+      <div className="pt-20">
+        <FlashcardComponent
+          flashcard={currentCard}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
+          onEdit={handleEditFlashcard}
+          onDelete={handleDeleteFlashcard}
+        />
+      </div>
+
+      {/* Navigation Controls */}
+      <div className="fixed bottom-0 left-0 right-0 z-10 bg-background/80 backdrop-blur-sm border-t">
+        <div className="flex items-center justify-center p-4 space-x-4">
+          <Button
+            variant="outline"
+            onClick={handlePrevious}
+            className="touch-target"
+            disabled={flashcards.length <= 1}
+          >
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Previous
+          </Button>
+          
+          <div className="px-4 py-2 bg-primary/10 rounded-lg">
+            <span className="text-sm font-medium text-primary">
+              Swipe to navigate
+            </span>
+          </div>
+          
+          <Button
+            variant="outline"
+            onClick={handleNext}
+            className="touch-target"
+            disabled={flashcards.length <= 1}
+          >
+            Next
+            <ChevronRight className="h-4 w-4 ml-1" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
