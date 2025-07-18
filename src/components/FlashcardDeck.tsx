@@ -9,10 +9,12 @@ import { useToast } from '@/hooks/use-toast';
 
 interface FlashcardDeckProps {
   flashcards: Flashcard[];
-  onUpdateFlashcards: (flashcards: Flashcard[]) => void;
+  onCreateFlashcard: (flashcard: Omit<Flashcard, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  onUpdateFlashcard: (flashcard: Flashcard) => Promise<void>;
+  onDeleteFlashcard: (flashcard: Flashcard) => Promise<void>;
 }
 
-export function FlashcardDeck({ flashcards, onUpdateFlashcards }: FlashcardDeckProps) {
+export function FlashcardDeck({ flashcards, onCreateFlashcard, onUpdateFlashcard, onDeleteFlashcard }: FlashcardDeckProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const { toast } = useToast();
 
@@ -39,41 +41,24 @@ export function FlashcardDeck({ flashcards, onUpdateFlashcards }: FlashcardDeckP
     }
   };
 
-  const handleCreateFlashcard = (newCard: Omit<Flashcard, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const flashcard: Flashcard = {
-      ...newCard,
-      id: Date.now().toString(),
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    
-    const updatedFlashcards = [...flashcards, flashcard];
-    onUpdateFlashcards(updatedFlashcards);
+  const handleCreateFlashcard = async (newCard: Omit<Flashcard, 'id' | 'createdAt' | 'updatedAt'>) => {
+    await onCreateFlashcard(newCard);
   };
 
-  const handleEditFlashcard = (flashcard: Flashcard) => {
-    // For now, just show a toast - edit modal can be implemented later
-    toast({
-      title: "Edit feature",
-      description: "Edit functionality coming soon!"
-    });
+  const handleEditFlashcard = async (flashcard: Flashcard) => {
+    await onUpdateFlashcard(flashcard);
   };
 
-  const handleDeleteFlashcard = (flashcard: Flashcard) => {
-    const updatedFlashcards = flashcards.filter(card => card.id !== flashcard.id);
-    onUpdateFlashcards(updatedFlashcards);
+  const handleDeleteFlashcard = async (flashcard: Flashcard) => {
+    await onDeleteFlashcard(flashcard);
     
     // Adjust current index if needed
-    if (currentIndex >= updatedFlashcards.length && updatedFlashcards.length > 0) {
-      setCurrentIndex(updatedFlashcards.length - 1);
-    } else if (updatedFlashcards.length === 0) {
+    const newLength = flashcards.length - 1;
+    if (currentIndex >= newLength && newLength > 0) {
+      setCurrentIndex(newLength - 1);
+    } else if (newLength === 0) {
       setCurrentIndex(0);
     }
-    
-    toast({
-      title: "Flashcard deleted",
-      description: "The flashcard has been removed from your deck."
-    });
   };
 
   const handleRestart = () => {

@@ -1,13 +1,12 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FlashcardDeck } from '@/components/FlashcardDeck';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useFlashcards } from '@/hooks/useFlashcards';
 import { useAuth } from '@/hooks/useAuth';
-import { Flashcard } from '@/types/flashcard';
 import { Button } from '@/components/ui/button';
 
 const Index = () => {
-  const [flashcards, setFlashcards] = useLocalStorage<Flashcard[]>('flashcards', []);
+  const { flashcards, loading: flashcardsLoading, createFlashcard, updateFlashcard, deleteFlashcard } = useFlashcards();
   const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -17,16 +16,13 @@ const Index = () => {
     }
   }, [user, loading, navigate]);
 
-  const handleUpdateFlashcards = (updatedFlashcards: Flashcard[]) => {
-    setFlashcards(updatedFlashcards);
-  };
 
   const handleSignOut = async () => {
     await signOut();
     navigate('/auth');
   };
 
-  if (loading) {
+  if (loading || flashcardsLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-secondary/20 flex items-center justify-center">
         <div className="text-center">
@@ -50,7 +46,9 @@ const Index = () => {
       </div>
       <FlashcardDeck 
         flashcards={flashcards}
-        onUpdateFlashcards={handleUpdateFlashcards}
+        onCreateFlashcard={createFlashcard}
+        onUpdateFlashcard={updateFlashcard}
+        onDeleteFlashcard={deleteFlashcard}
       />
     </div>
   );
