@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Flashcard } from '@/types/flashcard';
 import { FlashcardComponent } from './FlashcardComponent';
@@ -103,13 +104,11 @@ export function FlashcardDeck({ flashcards, onCreateFlashcard, onUpdateFlashcard
 
   return (
     <div className="relative min-h-screen bg-gradient-subtle">
-      {/* Header */}
+      {/* Header - Counter removed */}
       <div className="fixed top-0 left-0 right-0 z-10 bg-background/80 backdrop-blur-sm border-b">
         <div className="flex items-center justify-between p-4">
-          <div className="flex items-center space-x-2">
-            <span className="text-sm font-medium">
-              {currentIndex + 1} of {flashcards.length}
-            </span>
+          <div className="flex items-center">
+            {/* Counter removed - empty space for balance */}
           </div>
           
           <div className="flex items-center space-x-2">

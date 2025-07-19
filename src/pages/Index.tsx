@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FlashcardDeck } from '@/components/FlashcardDeck';
@@ -39,9 +40,11 @@ const Index = () => {
 
   return (
     <div className="relative">
-      <div className="absolute top-4 right-4 z-10">
+      {/* Fixed User Avatar - Always visible */}
+      <div className="fixed top-4 right-4 z-20">
         <UserAvatar onSignOut={handleSignOut} />
       </div>
+      
       <FlashcardDeck 
         flashcards={flashcards}
         onCreateFlashcard={createFlashcard}
