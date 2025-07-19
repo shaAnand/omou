@@ -5,11 +5,13 @@ import { FlashcardDeck } from '@/components/FlashcardDeck';
 import { UserAvatar } from '@/components/UserAvatar';
 import { useFlashcards } from '@/hooks/useFlashcards';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
   const { flashcards, loading: flashcardsLoading, createFlashcard, updateFlashcard, deleteFlashcard } = useFlashcards();
   const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -39,18 +41,20 @@ const Index = () => {
   }
 
   return (
-    <div className="relative">
-      {/* Fixed User Avatar - Always visible */}
-      <div className="fixed top-4 right-4 z-20">
+    <div className="relative min-h-screen">
+      {/* Fixed User Avatar - Always visible on left side */}
+      <div className={`fixed z-20 ${isMobile ? 'top-4 left-4' : 'top-6 left-6'}`}>
         <UserAvatar onSignOut={handleSignOut} />
       </div>
       
-      <FlashcardDeck 
-        flashcards={flashcards}
-        onCreateFlashcard={createFlashcard}
-        onUpdateFlashcard={updateFlashcard}
-        onDeleteFlashcard={deleteFlashcard}
-      />
+      <div className={`${isMobile ? 'px-4 pt-16' : 'px-8 pt-20'}`}>
+        <FlashcardDeck 
+          flashcards={flashcards}
+          onCreateFlashcard={createFlashcard}
+          onUpdateFlashcard={updateFlashcard}
+          onDeleteFlashcard={deleteFlashcard}
+        />
+      </div>
     </div>
   );
 };
