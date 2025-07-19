@@ -29,10 +29,6 @@ export function FlashcardDeck({ flashcards, onCreateFlashcard, onUpdateFlashcard
       setCurrentIndex(currentIndex + 1);
     } else {
       setCurrentIndex(0); // Loop back to first card
-      toast({
-        title: "Deck complete!",
-        description: "You've reviewed all cards. Starting over."
-      });
     }
   };
 

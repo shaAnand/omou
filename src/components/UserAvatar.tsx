@@ -20,7 +20,7 @@ export const UserAvatar = ({ onSignOut }: UserAvatarProps) => {
 
   if (loading || !user) {
     return (
-      <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
+      <div className="w-12 h-12 rounded-full bg-muted animate-pulse" />
     );
   }
 
@@ -30,8 +30,8 @@ export const UserAvatar = ({ onSignOut }: UserAvatarProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-8 w-8">
+        <Button variant="ghost" className="relative h-12 w-12 rounded-full">
+          <Avatar className="h-12 w-12">
             <AvatarImage src={profile?.avatar_url || ''} alt={displayName} />
             <AvatarFallback className="bg-primary text-primary-foreground">
               {firstChar}
