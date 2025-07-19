@@ -1,7 +1,6 @@
 export interface Flashcard {
   id: string;
-  front: string;
-  back: string;
+  content: string;
   image?: string;
   createdAt: Date;
   updatedAt: Date;

@@ -26,8 +26,7 @@ export function useFlashcards() {
 
       const formattedFlashcards: Flashcard[] = data.map(card => ({
         id: card.id,
-        front: card.front,
-        back: card.back,
+        content: card.content,
         image: card.image_url || undefined,
         createdAt: new Date(card.created_at),
         updatedAt: new Date(card.updated_at)
@@ -62,8 +61,7 @@ export function useFlashcards() {
         .from('flashcards')
         .insert({
           user_id: user.id,
-          front: flashcard.front,
-          back: flashcard.back,
+          content: flashcard.content,
           image_url: imageUrl
         })
         .select()
@@ -73,8 +71,7 @@ export function useFlashcards() {
 
       const newFlashcard: Flashcard = {
         id: data.id,
-        front: data.front,
-        back: data.back,
+        content: data.content,
         image: data.image_url || undefined,
         createdAt: new Date(data.created_at),
         updatedAt: new Date(data.updated_at)
@@ -111,8 +108,7 @@ export function useFlashcards() {
       const { data, error } = await supabase
         .from('flashcards')
         .update({
-          front: flashcard.front,
-          back: flashcard.back,
+          content: flashcard.content,
           image_url: imageUrl
         })
         .eq('id', flashcard.id)
@@ -124,8 +120,7 @@ export function useFlashcards() {
 
       const updatedFlashcard: Flashcard = {
         id: data.id,
-        front: data.front,
-        back: data.back,
+        content: data.content,
         image: data.image_url || undefined,
         createdAt: new Date(data.created_at),
         updatedAt: new Date(data.updated_at)

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Camera } from '@capacitor/camera';
 import { CameraResultType, CameraSource } from '@capacitor/camera';
 import {
@@ -6,27 +6,40 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Camera as CameraIcon, Upload, Plus, X } from 'lucide-react';
+import { Camera as CameraIcon, Upload, X } from 'lucide-react';
 import { Flashcard } from '@/types/flashcard';
 import { useToast } from '@/hooks/use-toast';
 
-interface CreateFlashcardModalProps {
-  onCreateFlashcard: (flashcard: Omit<Flashcard, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  trigger?: React.ReactNode;
+interface EditFlashcardModalProps {
+  flashcard: Flashcard | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onUpdateFlashcard: (flashcard: Flashcard) => void;
 }
 
-export function CreateFlashcardModal({ onCreateFlashcard, trigger }: CreateFlashcardModalProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function EditFlashcardModal({ 
+  flashcard, 
+  isOpen, 
+  onClose, 
+  onUpdateFlashcard 
+}: EditFlashcardModalProps) {
   const [content, setContent] = useState('');
   const [image, setImage] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+
+  // Initialize form with flashcard data
+  useEffect(() => {
+    if (flashcard) {
+      setContent(flashcard.content);
+      setImage(flashcard.image);
+    }
+  }, [flashcard]);
 
   const takePicture = async () => {
     try {
@@ -43,7 +56,7 @@ export function CreateFlashcardModal({ onCreateFlashcard, trigger }: CreateFlash
         setImage(photo.dataUrl);
         toast({
           title: "Photo captured!",
-          description: "Photo added to your flashcard."
+          description: "Photo updated for your flashcard."
         });
       }
     } catch (error) {
@@ -68,7 +81,7 @@ export function CreateFlashcardModal({ onCreateFlashcard, trigger }: CreateFlash
             setImage(event.target.result as string);
             toast({
               title: "Image uploaded!",
-              description: "Image added to your flashcard."
+              description: "Image updated for your flashcard."
             });
           }
         };
@@ -95,19 +108,20 @@ export function CreateFlashcardModal({ onCreateFlashcard, trigger }: CreateFlash
       return;
     }
 
-    onCreateFlashcard({
+    if (!flashcard) return;
+
+    const updatedFlashcard: Flashcard = {
+      ...flashcard,
       content: content.trim(),
       image
-    });
+    };
 
-    // Reset form
-    setContent('');
-    setImage(undefined);
-    setIsOpen(false);
+    onUpdateFlashcard(updatedFlashcard);
+    onClose();
 
     toast({
-      title: "Flashcard created!",
-      description: "Your new flashcard has been added to the deck."
+      title: "Flashcard updated!",
+      description: "Your flashcard has been updated successfully."
     });
   };
 
@@ -115,19 +129,22 @@ export function CreateFlashcardModal({ onCreateFlashcard, trigger }: CreateFlash
     setImage(undefined);
   };
 
+  const handleClose = () => {
+    onClose();
+    // Reset form when closing
+    if (flashcard) {
+      setContent(flashcard.content);
+      setImage(flashcard.image);
+    }
+  };
+
+  if (!flashcard) return null;
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        {trigger || (
-          <Button className="btn-primary touch-target">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Flashcard
-          </Button>
-        )}
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md mx-4">
         <DialogHeader>
-          <DialogTitle>Create New Flashcard</DialogTitle>
+          <DialogTitle>Edit Flashcard</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -146,7 +163,7 @@ export function CreateFlashcardModal({ onCreateFlashcard, trigger }: CreateFlash
 
           {/* Image Section */}
           <div className="space-y-2">
-            <Label>Add Image (Optional)</Label>
+            <Label>Update Image (Optional)</Label>
             {image ? (
               <div className="relative">
                 <img 
@@ -176,7 +193,7 @@ export function CreateFlashcardModal({ onCreateFlashcard, trigger }: CreateFlash
                   <CameraIcon className="h-5 w-5 mr-2" />
                   {isLoading ? 'Taking...' : 'Camera'}
                 </Button>
-                <label htmlFor="file-upload">
+                <label htmlFor="edit-file-upload">
                   <Button
                     type="button"
                     variant="outline"
@@ -189,7 +206,7 @@ export function CreateFlashcardModal({ onCreateFlashcard, trigger }: CreateFlash
                     </div>
                   </Button>
                   <Input
-                    id="file-upload"
+                    id="edit-file-upload"
                     type="file"
                     accept="image/*"
                     onChange={handleFileUpload}
@@ -204,7 +221,7 @@ export function CreateFlashcardModal({ onCreateFlashcard, trigger }: CreateFlash
             <Button
               type="button"
               variant="outline"
-              onClick={() => setIsOpen(false)}
+              onClick={handleClose}
               className="flex-1"
             >
               Cancel
@@ -213,7 +230,7 @@ export function CreateFlashcardModal({ onCreateFlashcard, trigger }: CreateFlash
               type="submit"
               className="btn-primary flex-1"
             >
-              Create Flashcard
+              Update Flashcard
             </Button>
           </div>
         </form>

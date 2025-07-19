@@ -1,8 +1,7 @@
-import { useState } from 'react';
 import { Flashcard } from '@/types/flashcard';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { RotateCcw, Edit2, Trash2 } from 'lucide-react';
+import { Edit2, Trash2 } from 'lucide-react';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 
 interface FlashcardComponentProps {
@@ -22,58 +21,43 @@ export function FlashcardComponent({
   onDelete,
   showControls = true
 }: FlashcardComponentProps) {
-  const [isFlipped, setIsFlipped] = useState(false);
-
   const { swipeHandlers } = useSwipeGesture({
     onSwipeLeft: onNext,
     onSwipeRight: onPrevious,
     threshold: 50
   });
 
-  const handleFlip = () => {
-    setIsFlipped(!isFlipped);
-  };
-
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gradient-subtle">
+    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-background">
       <div className="w-full max-w-sm mx-auto">
-        {/* Flashcard */}
+        {/* Flashcard - Single side with white background */}
         <div 
-          className="relative w-full h-96 perspective-1000 mb-6"
+          className="relative w-full mb-6"
           {...swipeHandlers}
         >
-          <Card 
-            className={`
-              flashcard absolute inset-0 w-full h-full cursor-pointer
-              transform-style-preserve-3d transition-transform duration-500
-              ${isFlipped ? 'rotate-y-180' : ''}
-            `}
-            onClick={handleFlip}
-          >
-            {/* Front */}
-            <div className="absolute inset-0 w-full h-full backface-hidden p-6 flex flex-col items-center justify-center text-center">
+          <Card className="w-full min-h-96 p-6 bg-white text-gray-900 shadow-lg border border-gray-200">
+            <div className="flex flex-col h-full">
+              {/* Image section */}
               {flashcard.image && (
-                <img 
-                  src={flashcard.image} 
-                  alt="Flashcard" 
-                  className="w-full h-32 object-cover rounded-lg mb-4"
-                />
+                <div className="mb-4 flex-shrink-0">
+                  <img 
+                    src={flashcard.image} 
+                    alt="Flashcard" 
+                    className="w-full h-48 object-cover rounded-lg border border-gray-200"
+                  />
+                </div>
               )}
-              <p className="text-lg font-medium text-foreground break-words">
-                {flashcard.front}
-              </p>
-              <div className="absolute bottom-4 right-4 text-xs text-muted-foreground">
-                Tap to flip
+              
+              {/* Content section */}
+              <div className="flex-1 flex items-center justify-center">
+                <p className="text-lg leading-relaxed text-center font-medium text-gray-800 break-words">
+                  {flashcard.content}
+                </p>
               </div>
-            </div>
-
-            {/* Back */}
-            <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 p-6 flex flex-col items-center justify-center text-center bg-gradient-card">
-              <p className="text-lg font-medium text-foreground break-words">
-                {flashcard.back}
-              </p>
-              <div className="absolute bottom-4 right-4 text-xs text-muted-foreground">
-                Swipe for next
+              
+              {/* Swipe hint */}
+              <div className="text-xs text-gray-500 text-center mt-4">
+                Swipe for next card
               </div>
             </div>
           </Card>
@@ -82,21 +66,12 @@ export function FlashcardComponent({
         {/* Controls */}
         {showControls && (
           <div className="flex items-center justify-center space-x-4">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setIsFlipped(!isFlipped)}
-              className="touch-target"
-            >
-              <RotateCcw className="h-4 w-4" />
-            </Button>
-            
             {onEdit && (
               <Button
                 variant="outline"
                 size="icon"
                 onClick={() => onEdit(flashcard)}
-                className="touch-target"
+                className="touch-target bg-white hover:bg-gray-50"
               >
                 <Edit2 className="h-4 w-4" />
               </Button>
@@ -107,7 +82,7 @@ export function FlashcardComponent({
                 variant="outline"
                 size="icon"
                 onClick={() => onDelete(flashcard)}
-                className="touch-target"
+                className="touch-target bg-white hover:bg-gray-50"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>

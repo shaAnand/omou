@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Flashcard } from '@/types/flashcard';
 import { FlashcardComponent } from './FlashcardComponent';
 import { CreateFlashcardModal } from './CreateFlashcardModal';
+import { EditFlashcardModal } from './EditFlashcardModal';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ChevronLeft, ChevronRight, Plus, RotateCcw } from 'lucide-react';
@@ -16,6 +17,7 @@ interface FlashcardDeckProps {
 
 export function FlashcardDeck({ flashcards, onCreateFlashcard, onUpdateFlashcard, onDeleteFlashcard }: FlashcardDeckProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [editingFlashcard, setEditingFlashcard] = useState<Flashcard | null>(null);
   const { toast } = useToast();
 
   const currentCard = flashcards[currentIndex];
@@ -45,8 +47,13 @@ export function FlashcardDeck({ flashcards, onCreateFlashcard, onUpdateFlashcard
     await onCreateFlashcard(newCard);
   };
 
-  const handleEditFlashcard = async (flashcard: Flashcard) => {
+  const handleEditFlashcard = (flashcard: Flashcard) => {
+    setEditingFlashcard(flashcard);
+  };
+
+  const handleUpdateFlashcard = async (flashcard: Flashcard) => {
     await onUpdateFlashcard(flashcard);
+    setEditingFlashcard(null);
   };
 
   const handleDeleteFlashcard = async (flashcard: Flashcard) => {
@@ -163,6 +170,14 @@ export function FlashcardDeck({ flashcards, onCreateFlashcard, onUpdateFlashcard
           </Button>
         </div>
       </div>
+
+      {/* Edit Modal */}
+      <EditFlashcardModal
+        flashcard={editingFlashcard}
+        isOpen={!!editingFlashcard}
+        onClose={() => setEditingFlashcard(null)}
+        onUpdateFlashcard={handleUpdateFlashcard}
+      />
     </div>
   );
 }
