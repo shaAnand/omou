@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FlashcardDeck } from '@/components/FlashcardDeck';
+import { UserAvatar } from '@/components/UserAvatar';
 import { useFlashcards } from '@/hooks/useFlashcards';
 import { useAuth } from '@/hooks/useAuth';
-import { Button } from '@/components/ui/button';
 
 const Index = () => {
   const { flashcards, loading: flashcardsLoading, createFlashcard, updateFlashcard, deleteFlashcard } = useFlashcards();
@@ -40,9 +40,7 @@ const Index = () => {
   return (
     <div className="relative">
       <div className="absolute top-4 right-4 z-10">
-        <Button variant="outline" onClick={handleSignOut} size="sm">
-          Sign Out
-        </Button>
+        <UserAvatar onSignOut={handleSignOut} />
       </div>
       <FlashcardDeck 
         flashcards={flashcards}
