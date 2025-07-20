@@ -125,28 +125,28 @@ export function CreateFlashcardModal({ onCreateFlashcard, trigger }: CreateFlash
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md mx-4">
-        <DialogHeader>
-          <DialogTitle>Create New Flashcard</DialogTitle>
+      <DialogContent className="sm:max-w-lg mx-4 p-6">
+        <DialogHeader className="mb-6">
+          <DialogTitle className="heading-secondary">Create New Flashcard</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Content */}
-          <div className="space-y-2">
-            <Label htmlFor="content">Enter your text here *</Label>
+        <form onSubmit={handleSubmit} className="element-spacing">
+          {/* Content with clean spacing */}
+          <div className="space-y-3">
+            <Label htmlFor="content" className="body-text font-medium">Content *</Label>
             <Textarea
               id="content"
-              placeholder="Type your flashcard content..."
+              placeholder="Enter your flashcard content..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="min-h-24"
+              className="input-clean min-h-32 resize-none"
               required
             />
           </div>
 
-          {/* Image Section */}
-          <div className="space-y-2">
-            <Label>Add Image (Optional)</Label>
+          {/* Image Section with clean layout */}
+          <div className="space-y-3">
+            <Label className="body-text font-medium">Image (Optional)</Label>
             {image ? (
               <div className="relative">
                 <img 
@@ -200,12 +200,12 @@ export function CreateFlashcardModal({ onCreateFlashcard, trigger }: CreateFlash
             )}
           </div>
 
-          <div className="flex gap-2 pt-4">
+          <div className="flex gap-3 pt-6">
             <Button
               type="button"
               variant="outline"
               onClick={() => setIsOpen(false)}
-              className="flex-1"
+              className="btn-secondary flex-1"
             >
               Cancel
             </Button>

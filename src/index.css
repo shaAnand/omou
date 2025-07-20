@@ -8,55 +8,54 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Light mode - White background with black text */
+    /* Clean UI Base Colors - Minimal palette */
     --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
+    --foreground: 0 0% 9%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
+    --card-foreground: 0 0% 9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
+    --popover-foreground: 0 0% 9%;
 
-    /* Primary - Modern purple/blue gradient */
-    --primary: 262 83% 58%;
+    /* Primary - Single focus color */
+    --primary: 221 83% 53%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 271 91% 65%;
 
-    /* Secondary - Light grey accent */
+    /* Secondary - Subtle neutrals */
     --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 0%;
+    --secondary-foreground: 0 0% 9%;
 
     --muted: 0 0% 96%;
     --muted-foreground: 0 0% 45%;
 
     --accent: 0 0% 96%;
-    --accent-foreground: 0 0% 0%;
+    --accent-foreground: 0 0% 9%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
+    /* Subtle borders */
     --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 262 83% 58%;
+    --input: 0 0% 96%;
+    --ring: 221 83% 53%;
 
-    --radius: 1rem;
+    /* Consistent radius */
+    --radius: 8px;
 
-    /* Custom gradients for flashcards - Light mode */
-    --gradient-primary: linear-gradient(135deg, hsl(262, 83%, 58%), hsl(271, 91%, 65%));
-    --gradient-card: linear-gradient(145deg, hsl(0, 0%, 100%), hsl(0, 0%, 98%));
-    --gradient-subtle: linear-gradient(180deg, hsl(0, 0%, 100%), hsl(0, 0%, 98%));
+    /* Clean gradients - Barely perceptible */
+    --gradient-primary: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted) / 0.3));
+    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted) / 0.1));
+    --gradient-card: linear-gradient(135deg, hsl(var(--card)), hsl(var(--accent) / 0.05));
     
-    /* Shadows */
-    --shadow-card: 0 20px 40px -12px hsl(262, 83%, 58% / 0.25);
-    --shadow-glow: 0 0 40px hsl(271, 91%, 65% / 0.4);
-    --shadow-soft: 0 8px 32px -8px hsl(240, 10%, 3.9% / 0.6);
+    /* Soft, natural shadows */
+    --shadow-subtle: 0 1px 3px 0 hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+    --shadow-medium: 0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -2px hsl(0 0% 0% / 0.1);
+    --shadow-elevation: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -4px hsl(0 0% 0% / 0.1);
 
-    /* Animation timing */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-spring: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-
-    --radius: 1rem;
+    /* Smooth transitions */
+    --transition-smooth: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-gentle: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
 
     --sidebar-background: 0 0% 98%;
 
@@ -76,39 +75,44 @@ All colors MUST be HSL.
   }
 
   .dark {
-    /* Dark mode - Dark background with grey text */
-    --background: 0 0% 10%;
-    --foreground: 0 0% 75%;
+    /* Dark mode - High contrast with comfortable grays */
+    --background: 222 84% 5%;
+    --foreground: 210 40% 90%;
 
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 75%;
+    --card: 222 84% 7%;
+    --card-foreground: 210 40% 90%;
 
-    --popover: 0 0% 15%;
-    --popover-foreground: 0 0% 75%;
+    --popover: 222 84% 7%;
+    --popover-foreground: 210 40% 90%;
 
-    --primary: 262 83% 58%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 221 83% 60%;
+    --primary-foreground: 222 84% 5%;
 
-    --secondary: 0 0% 20%;
-    --secondary-foreground: 0 0% 75%;
+    --secondary: 217 32% 10%;
+    --secondary-foreground: 210 40% 90%;
 
-    --muted: 0 0% 20%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 217 32% 8%;
+    --muted-foreground: 215 20% 60%;
 
-    --accent: 0 0% 20%;
-    --accent-foreground: 0 0% 75%;
+    --accent: 217 32% 10%;
+    --accent-foreground: 210 40% 90%;
 
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 84% 65%;
+    --destructive-foreground: 210 40% 90%;
 
-    --border: 0 0% 25%;
-    --input: 0 0% 25%;
-    --ring: 262 83% 58%;
+    --border: 217 32% 15%;
+    --input: 217 32% 12%;
+    --ring: 221 83% 60%;
 
-    /* Dark mode gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(262, 83%, 58%), hsl(271, 91%, 65%));
-    --gradient-card: linear-gradient(145deg, hsl(0, 0%, 15%), hsl(0, 0%, 10%));
-    --gradient-subtle: linear-gradient(180deg, hsl(0, 0%, 15%), hsl(0, 0%, 10%));
+    /* Dark gradients - Subtle depth */
+    --gradient-primary: linear-gradient(180deg, hsl(var(--background)), hsl(var(--secondary) / 0.5));
+    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted) / 0.3));
+    --gradient-card: linear-gradient(135deg, hsl(var(--card)), hsl(var(--accent) / 0.2));
+    
+    /* Enhanced shadows for dark mode */
+    --shadow-subtle: 0 1px 3px 0 hsl(0 0% 0% / 0.3), 0 1px 2px -1px hsl(0 0% 0% / 0.3);
+    --shadow-medium: 0 4px 6px -1px hsl(0 0% 0% / 0.4), 0 2px 4px -2px hsl(0 0% 0% / 0.4);
+    --shadow-elevation: 0 10px 15px -3px hsl(0 0% 0% / 0.5), 0 4px 6px -4px hsl(0 0% 0% / 0.5);
 
     --sidebar-background: 0 0% 15%;
     --sidebar-foreground: 0 0% 75%;
@@ -154,80 +158,170 @@ All colors MUST be HSL.
 }
 
 @layer components {
-  /* Flashcard specific styles */
-  .flashcard {
-    background: var(--gradient-card);
-    border: 1px solid hsl(var(--border));
-    box-shadow: var(--shadow-card);
+  /* Clean UI Layout System */
+  .content-container {
+    @apply max-w-4xl mx-auto px-6 py-8;
+  }
+
+  .section-spacing {
+    @apply space-y-8;
+  }
+
+  .element-spacing {
+    @apply space-y-4;
+  }
+
+  /* Typography Hierarchy */
+  .heading-primary {
+    @apply text-3xl font-semibold tracking-tight text-foreground;
+  }
+
+  .heading-secondary {
+    @apply text-xl font-medium text-foreground;
+  }
+
+  .body-text {
+    @apply text-base leading-relaxed text-foreground;
+  }
+
+  .caption-text {
+    @apply text-sm text-muted-foreground;
+  }
+
+  /* Clean Card System */
+  .card-clean {
+    @apply bg-card border border-border/50 rounded-lg;
+    box-shadow: var(--shadow-subtle);
     transition: var(--transition-smooth);
   }
 
-  .flashcard:hover {
-    box-shadow: var(--shadow-glow);
-    transform: translateY(-4px);
+  .card-clean:hover {
+    box-shadow: var(--shadow-medium);
   }
 
+  .card-elevated {
+    @apply bg-card rounded-lg;
+    box-shadow: var(--shadow-elevation);
+  }
+
+  /* Button System - Minimal and Focused */
   .btn-primary {
-    background: var(--gradient-primary);
+    @apply bg-primary text-primary-foreground rounded-lg px-6 py-3;
+    @apply font-medium;
+    box-shadow: var(--shadow-subtle);
     transition: var(--transition-smooth);
   }
 
   .btn-primary:hover {
-    box-shadow: var(--shadow-glow);
-    transform: translateY(-2px);
+    @apply bg-primary/90;
+    box-shadow: var(--shadow-medium);
+  }
+
+  .btn-primary:focus {
+    @apply ring-2 ring-primary/20;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground rounded-lg px-6 py-3;
+    @apply font-medium border border-border;
+    transition: var(--transition-smooth);
+  }
+
+  .btn-secondary:hover {
+    @apply bg-secondary/80;
+  }
+
+  .btn-secondary:focus {
+    @apply ring-2 ring-primary/20;
+  }
+
+  .btn-ghost {
+    @apply text-foreground rounded-lg px-4 py-2;
+    @apply font-medium;
+    transition: var(--transition-smooth);
+  }
+
+  .btn-ghost:hover {
+    @apply bg-muted;
+  }
+
+  .btn-ghost:focus {
+    @apply bg-muted;
+  }
+
+  /* Input System */
+  .input-clean {
+    @apply bg-input border border-border rounded-lg;
+    @apply px-4 py-3 text-foreground placeholder:text-muted-foreground;
+    transition: var(--transition-smooth);
+  }
+
+  .input-clean:focus {
+    @apply border-primary ring-2 ring-primary/20;
   }
 
   /* Touch-friendly sizing */
   .touch-target {
-    min-height: 44px;
-    min-width: 44px;
+    @apply min-h-[44px] min-w-[44px];
   }
 
-  /* Swipe indicators */
-  .swipe-indicator {
-    opacity: 0;
-    transition: var(--transition-smooth);
+  /* Grid System */
+  .grid-responsive {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
   }
 
-  .swipe-indicator.active {
-    opacity: 1;
+  /* Smooth Animations */
+  .animate-fade-in {
+    @apply opacity-0 translate-y-2;
+    animation: fadeIn 0.3s ease-out forwards;
   }
 
-  /* 3D flip effect */
-  .perspective-1000 {
-    perspective: 1000px;
+  @keyframes fadeIn {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
-  .transform-style-preserve-3d {
-    transform-style: preserve-3d;
-  }
-
-  .backface-hidden {
-    backface-visibility: hidden;
-  }
-
-  .rotate-y-180 {
-    transform: rotateY(180deg);
-  }
-
-  /* Mobile viewport optimizations */
-  .min-h-screen {
-    min-height: 100vh;
-    min-height: 100dvh; /* Dynamic viewport height for mobile */
+  /* Mobile Optimizations */
+  @media (max-width: 768px) {
+    .content-container {
+      @apply px-4 py-6;
+    }
+    
+    .section-spacing {
+      @apply space-y-6;
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+      @apply px-8 py-4 text-lg;
+    }
+    
+    /* Mobile viewport */
+    .min-h-screen {
+      min-height: 100vh;
+      min-height: 100dvh;
+    }
+    
+    /* Improve scroll on mobile */
+    body {
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Hide scrollbars */
+    body::-webkit-scrollbar {
+      display: none;
+    }
+    
+    body {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
   }
 
   /* Smooth scrolling */
   html {
     scroll-behavior: smooth;
-  }
-
-  /* Hide scrollbars on mobile while keeping functionality */
-  body::-webkit-scrollbar {
-    display: none;
-  }
-  
-  body {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
   }
 }
