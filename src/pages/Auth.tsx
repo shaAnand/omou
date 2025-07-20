@@ -54,7 +54,7 @@ const Auth = () => {
       <Card className="w-full max-w-md backdrop-blur-sm bg-card/95 border border-border/50">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            Remember App
+            Omou
           </CardTitle>
           <CardDescription>
             Sign in to access your flashcards
