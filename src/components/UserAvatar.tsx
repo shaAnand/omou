@@ -6,10 +6,12 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { LogOut, User } from 'lucide-react';
+import { LogOut, User, Grid3X3 } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
+import { useNavigate } from 'react-router-dom';
 
 interface UserAvatarProps {
   onSignOut: () => void;
@@ -18,6 +20,7 @@ interface UserAvatarProps {
 export const UserAvatar = ({ onSignOut }: UserAvatarProps) => {
   const { profile, loading } = useProfile();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   if (loading || !user) {
     return (
@@ -49,6 +52,14 @@ export const UserAvatar = ({ onSignOut }: UserAvatarProps) => {
               <span className="font-medium">{displayName}</span>
             </div>
             <span className="text-xs text-muted-foreground">{user.email}</span>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem 
+            onClick={() => navigate('/categories')} 
+            className="flex items-center"
+          >
+            <Grid3X3 className="mr-2 h-4 w-4" />
+            <span>Categories</span>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={onSignOut}>
             <LogOut className="mr-2 h-4 w-4" />
