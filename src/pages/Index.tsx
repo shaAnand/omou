@@ -3,13 +3,16 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FlashcardDeck } from '@/components/FlashcardDeck';
 import { UserAvatar } from '@/components/UserAvatar';
+import { OnboardingModal } from '@/components/OnboardingModal';
 import { useFlashcards } from '@/hooks/useFlashcards';
 import { useAuth } from '@/hooks/useAuth';
+import { useProfile } from '@/hooks/useProfile';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
-  const { flashcards, loading: flashcardsLoading, createFlashcard, updateFlashcard, deleteFlashcard } = useFlashcards();
+  const { flashcards, loading: flashcardsLoading, createFlashcard, updateFlashcard, deleteFlashcard, refetchFlashcards } = useFlashcards();
   const { user, loading, signOut } = useAuth();
+  const { profile, loading: profileLoading } = useProfile();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
@@ -25,7 +28,14 @@ const Index = () => {
     navigate('/auth');
   };
 
-  if (loading) {
+  const handleOnboardingComplete = async () => {
+    // Refresh flashcards after onboarding
+    await refetchFlashcards();
+  };
+
+  const showOnboarding = user && profile && !profile.onboarding_completed;
+
+  if (loading || profileLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-secondary/20 flex items-center justify-center">
         <div className="text-center">
@@ -56,6 +66,14 @@ const Index = () => {
           onDeleteFlashcard={deleteFlashcard}
         />
       </div>
+
+      {/* Onboarding Modal */}
+      {showOnboarding && (
+        <OnboardingModal 
+          open={true} 
+          onComplete={handleOnboardingComplete}
+        />
+      )}
     </div>
   );
 };

@@ -47,6 +47,8 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          onboarding_completed: boolean | null
+          selected_categories: string[] | null
           updated_at: string
           user_id: string
         }
@@ -55,6 +57,8 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          onboarding_completed?: boolean | null
+          selected_categories?: string[] | null
           updated_at?: string
           user_id: string
         }
@@ -63,6 +67,8 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          onboarding_completed?: boolean | null
+          selected_categories?: string[] | null
           updated_at?: string
           user_id?: string
         }
@@ -73,7 +79,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_sample_thoughts: {
+        Args: { category_name: string }
+        Returns: {
+          content: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

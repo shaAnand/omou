@@ -7,6 +7,8 @@ interface Profile {
   user_id: string;
   display_name: string | null;
   avatar_url: string | null;
+  onboarding_completed: boolean | null;
+  selected_categories: string[] | null;
   created_at: string;
   updated_at: string;
 }
