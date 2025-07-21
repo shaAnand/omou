@@ -108,32 +108,13 @@ export function FlashcardDeck({ flashcards, loading = false, onCreateFlashcard, 
 
   return (
     <div className="relative min-h-screen bg-gradient-subtle">
-      {/* Header - Counter removed */}
+      {/* Header with just progress */}
       <div className="fixed top-0 left-0 right-0 z-10 bg-background/80 backdrop-blur-sm border-b">
-        <div className="flex items-center justify-between p-4">
-          <div className="flex items-center">
-            {/* Counter removed - empty space for balance */}
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleRestart}
-              className="touch-target"
-            >
-              <RotateCcw className="h-4 w-4" />
-            </Button>
-            
-            <CreateFlashcardModal onCreateFlashcard={handleCreateFlashcard} />
-          </div>
-        </div>
-        
         <Progress value={progress} className="h-1" />
       </div>
 
       {/* Main Content */}
-      <div className="pt-20">
+      <div className="pt-4">
         <FlashcardComponent
           flashcard={currentCard}
           onNext={handleNext}
@@ -143,33 +124,45 @@ export function FlashcardDeck({ flashcards, loading = false, onCreateFlashcard, 
         />
       </div>
 
-      {/* Navigation Controls */}
+      {/* Bottom Navigation with all icons */}
       <div className="fixed bottom-0 left-0 right-0 z-10 bg-background/80 backdrop-blur-sm border-t">
-        <div className="flex items-center justify-center p-4 space-x-4">
+        <div className="flex items-center justify-between p-4">
           <Button
             variant="outline"
+            size="icon"
             onClick={handlePrevious}
             className="touch-target"
             disabled={flashcards.length <= 1}
           >
-            <ChevronLeft className="h-4 w-4 mr-1" />
-            Previous
+            <ChevronLeft className="h-4 w-4" />
           </Button>
-          
-          <div className="px-4 py-2 bg-primary/10 rounded-lg">
-            <span className="text-sm font-medium text-primary">
-              Swipe to navigate
-            </span>
-          </div>
           
           <Button
             variant="outline"
+            size="icon"
+            onClick={handleRestart}
+            className="touch-target"
+          >
+            <RotateCcw className="h-4 w-4" />
+          </Button>
+          
+          <CreateFlashcardModal 
+            onCreateFlashcard={handleCreateFlashcard}
+            trigger={
+              <Button size="icon" className="btn-primary touch-target">
+                <Plus className="h-5 w-5" />
+              </Button>
+            }
+          />
+          
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleNext}
             className="touch-target"
             disabled={flashcards.length <= 1}
           >
-            Next
-            <ChevronRight className="h-4 w-4 ml-1" />
+            <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
       </div>
