@@ -127,7 +127,7 @@ export function CreateFlashcardModal({ onCreateFlashcard, trigger }: CreateFlash
       </DialogTrigger>
       <DialogContent className="sm:max-w-md mx-4">
         <DialogHeader>
-          <DialogTitle>Create New Flashcard</DialogTitle>
+          <DialogTitle>Create New Thoughts</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -213,7 +213,7 @@ export function CreateFlashcardModal({ onCreateFlashcard, trigger }: CreateFlash
               type="submit"
               className="btn-primary flex-1"
             >
-              Create Flashcard
+              Create Thoughts
             </Button>
           </div>
         </form>
