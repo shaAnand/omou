@@ -4,6 +4,7 @@ import { Flashcard } from '@/types/flashcard';
 import { FlashcardComponent } from './FlashcardComponent';
 import { CreateFlashcardModal } from './CreateFlashcardModal';
 import { EditFlashcardModal } from './EditFlashcardModal';
+import { FlashcardDeckSkeleton, EmptyStateSkeleton } from './LoadingSkeleton';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ChevronLeft, ChevronRight, Plus, RotateCcw } from 'lucide-react';
@@ -11,12 +12,13 @@ import { useToast } from '@/hooks/use-toast';
 
 interface FlashcardDeckProps {
   flashcards: Flashcard[];
+  loading?: boolean;
   onCreateFlashcard: (flashcard: Omit<Flashcard, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   onUpdateFlashcard: (flashcard: Flashcard) => Promise<void>;
   onDeleteFlashcard: (flashcard: Flashcard) => Promise<void>;
 }
 
-export function FlashcardDeck({ flashcards, onCreateFlashcard, onUpdateFlashcard, onDeleteFlashcard }: FlashcardDeckProps) {
+export function FlashcardDeck({ flashcards, loading = false, onCreateFlashcard, onUpdateFlashcard, onDeleteFlashcard }: FlashcardDeckProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [editingFlashcard, setEditingFlashcard] = useState<Flashcard | null>(null);
   const { toast } = useToast();
@@ -73,12 +75,18 @@ export function FlashcardDeck({ flashcards, onCreateFlashcard, onUpdateFlashcard
     });
   };
 
+  // Show loading skeleton when loading
+  if (loading) {
+    return <FlashcardDeckSkeleton />;
+  }
+
+  // Show empty state when no flashcards
   if (flashcards.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gradient-subtle">
         <div className="text-center space-y-6">
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-foreground">Welcome to Flashcards</h2>
+            <h2 className="text-2xl font-bold text-foreground">Welcome to Omou</h2>
             <p className="text-muted-foreground">
               Create your first flashcard to start studying
             </p>

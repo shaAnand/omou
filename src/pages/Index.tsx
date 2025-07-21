@@ -25,7 +25,7 @@ const Index = () => {
     navigate('/auth');
   };
 
-  if (loading || flashcardsLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-secondary/20 flex items-center justify-center">
         <div className="text-center">
@@ -50,6 +50,7 @@ const Index = () => {
       <div className={`${isMobile ? 'px-4 pt-16' : 'px-8 pt-20'}`}>
         <FlashcardDeck 
           flashcards={flashcards}
+          loading={flashcardsLoading}
           onCreateFlashcard={createFlashcard}
           onUpdateFlashcard={updateFlashcard}
           onDeleteFlashcard={deleteFlashcard}
