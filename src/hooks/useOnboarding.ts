@@ -51,11 +51,11 @@ export const useOnboarding = () => {
       // Update profile to mark onboarding as completed
       const { error: profileError } = await supabase
         .from('profiles')
-        .upsert({
-          user_id: user.id,
+        .update({
           onboarding_completed: true,
           selected_categories: selectedCategories
-        });
+        })
+        .eq('user_id', user.id);
 
       if (profileError) {
         throw profileError;
