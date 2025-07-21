@@ -1,6 +1,8 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { useOfflineStorage } from './useOfflineStorage';
 import { Flashcard } from '@/types/flashcard';
 import { useToast } from '@/hooks/use-toast';
 
@@ -9,6 +11,7 @@ export function useFlashcards() {
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { offlineFlashcards, isOffline, cacheFlashcards } = useOfflineStorage();
 
   // Fetch flashcards for the current user
   const fetchFlashcards = async () => {
@@ -16,6 +19,16 @@ export function useFlashcards() {
     
     setLoading(true);
     try {
+      if (isOffline) {
+        // Use cached flashcards when offline
+        setFlashcards(offlineFlashcards);
+        toast({
+          title: "Offline mode",
+          description: "Showing cached flashcards. Changes will sync when online."
+        });
+        return;
+      }
+
       const { data, error } = await supabase
         .from('flashcards')
         .select('*')
@@ -33,12 +46,23 @@ export function useFlashcards() {
       }));
 
       setFlashcards(formattedFlashcards);
+      // Cache for offline use
+      cacheFlashcards(formattedFlashcards);
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load flashcards"
-      });
+      // If online request fails, try to use cached data
+      if (offlineFlashcards.length > 0) {
+        setFlashcards(offlineFlashcards);
+        toast({
+          title: "Connection error",
+          description: "Showing cached flashcards. Please check your connection."
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load flashcards"
+        });
+      }
       console.error('Error fetching flashcards:', error);
     } finally {
       setLoading(false);
@@ -235,7 +259,7 @@ export function useFlashcards() {
     } else {
       setFlashcards([]);
     }
-  }, [user]);
+  }, [user, isOffline]);
 
   return {
     flashcards,
@@ -243,6 +267,7 @@ export function useFlashcards() {
     createFlashcard,
     updateFlashcard,
     deleteFlashcard,
-    refetchFlashcards: fetchFlashcards
+    refetchFlashcards: fetchFlashcards,
+    isOffline
   };
 }
