@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -80,8 +81,15 @@ export const OnboardingModal = ({ open, onComplete }: OnboardingModalProps) => {
     }
   };
 
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      // When dialog is closed via X button, treat it as skip
+      handleSkip();
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl">
