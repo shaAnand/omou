@@ -128,24 +128,37 @@ export function CreateFlashcardModal({ onCreateFlashcard, trigger }: CreateFlash
       <DialogContent className="sm:max-w-md mx-4">
         <DialogHeader>
           <DialogTitle>Create New Thoughts</DialogTitle>
+          <p className="text-sm text-muted-foreground">
+            Choose one of the options below to capture your thoughts
+          </p>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Content */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Option 1: Write thoughts */}
           <div className="space-y-2">
-            <Label htmlFor="content">Enter your text here (text or image required)</Label>
+            <Label htmlFor="content" className="text-base font-medium">
+              📝 Write your thoughts
+            </Label>
             <Textarea
               id="content"
-              placeholder="Type your thought content..."
+              placeholder="What's on your mind? Share your thoughts here..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
               className="min-h-24"
             />
           </div>
 
-          {/* Image Section */}
+          <div className="flex items-center gap-4">
+            <div className="flex-1 h-px bg-border"></div>
+            <span className="text-sm text-muted-foreground">OR</span>
+            <div className="flex-1 h-px bg-border"></div>
+          </div>
+
+          {/* Option 2: Upload image */}
           <div className="space-y-2">
-            <Label>Add Image (Optional)</Label>
+            <Label className="text-base font-medium">
+              📸 Seen something beautiful? Upload the image
+            </Label>
             {image ? (
               <div className="relative">
                 <img 
