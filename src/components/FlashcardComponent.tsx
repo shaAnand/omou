@@ -87,24 +87,22 @@ export function FlashcardComponent({
                 {onEdit && (
                   <Button
                     variant="outline"
-                    size="lg"
+                    size="icon"
                     onClick={() => onEdit(flashcard)}
-                    className="touch-target bg-white hover:bg-blue-50 border-2 border-blue-200 hover:border-blue-300 px-6 py-3"
+                    className="touch-target w-12 h-12 rounded-full bg-white hover:bg-blue-50 border-2 border-blue-200 hover:border-blue-300"
                   >
-                    <Edit2 className="h-5 w-5 mr-2 text-blue-600" />
-                    <span className="text-blue-600 font-medium">Edit</span>
+                    <Edit2 className="h-5 w-5 text-blue-600" />
                   </Button>
                 )}
                 
                 {onDelete && (
                   <Button
                     variant="outline"
-                    size="lg"
+                    size="icon"
                     onClick={() => onDelete(flashcard)}
-                    className="touch-target bg-white hover:bg-red-50 border-2 border-red-200 hover:border-red-300 px-6 py-3"
+                    className="touch-target w-12 h-12 rounded-full bg-white hover:bg-red-50 border-2 border-red-200 hover:border-red-300"
                   >
-                    <Trash2 className="h-5 w-5 mr-2 text-red-600" />
-                    <span className="text-red-600 font-medium">Delete</span>
+                    <Trash2 className="h-5 w-5 text-red-600" />
                   </Button>
                 )}
               </>
