@@ -41,26 +41,20 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Clean header with generous whitespace */}
-      <header className="border-b border-border bg-background/80 backdrop-blur-sm">
-        <div className="content-container">
-          <div className="flex items-center justify-between py-4">
-            <h1 className="heading-primary">Omou</h1>
-            <UserAvatar onSignOut={handleSignOut} />
-          </div>
-        </div>
-      </header>
+    <div className="relative min-h-screen">
+      {/* Fixed User Avatar - Always visible on left side */}
+      <div className={`fixed z-20 ${isMobile ? 'top-4 left-4' : 'top-6 left-6'}`}>
+        <UserAvatar onSignOut={handleSignOut} />
+      </div>
       
-      {/* Main content with proper spacing */}
-      <main className="content-container">
+      <div className={`${isMobile ? 'px-4 pt-16' : 'px-8 pt-20'}`}>
         <FlashcardDeck 
           flashcards={flashcards}
           onCreateFlashcard={createFlashcard}
           onUpdateFlashcard={updateFlashcard}
           onDeleteFlashcard={deleteFlashcard}
         />
-      </main>
+      </div>
     </div>
   );
 };

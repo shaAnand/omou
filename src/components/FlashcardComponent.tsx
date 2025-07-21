@@ -29,29 +29,29 @@ export function FlashcardComponent({
   });
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="w-full max-w-lg mx-auto">
-        {/* Clean flashcard with generous whitespace */}
+    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-background">
+      <div className="w-full max-w-sm mx-auto">
+        {/* Flashcard - Single side with white background */}
         <div 
-          className="mb-8"
+          className="relative w-full mb-6"
           {...swipeHandlers}
         >
-          <Card className="card-elevated min-h-[400px] p-8">
-            <div className="flex flex-col h-full min-h-[320px]">
-              {/* Image section with clean styling */}
+          <Card className="w-full min-h-96 p-8 bg-white text-gray-900 shadow-lg border border-gray-200">
+            <div className="flex flex-col h-full min-h-80">
+              {/* Image section */}
               {flashcard.image && (
                 <div className="mb-6 flex-shrink-0">
                   <img 
                     src={flashcard.image} 
-                    alt="Flashcard visual content" 
-                    className="w-full h-48 object-cover rounded-lg border border-border"
+                    alt="Flashcard" 
+                    className="w-full h-48 object-cover rounded-lg border border-gray-200"
                   />
                 </div>
               )}
               
-              {/* Content with optimal typography */}
-              <div className="flex-1 flex items-center justify-center">
-                <p className="text-xl leading-relaxed text-center text-foreground font-normal break-words max-w-prose">
+              {/* Content section - expanded to fill more space */}
+              <div className="flex-1 flex items-center justify-center p-4">
+                <p className="text-xl leading-relaxed text-center font-medium text-gray-800 break-words w-full">
                   {flashcard.content}
                 </p>
               </div>
@@ -59,32 +59,44 @@ export function FlashcardComponent({
           </Card>
         </div>
 
-        {/* Minimal control buttons */}
+        {/* Controls - Improved visibility */}
         {showControls && (
-          <div className="flex items-center justify-center gap-4">
+          <div className="flex items-center justify-center space-x-6">
             {onEdit && (
               <Button
                 variant="outline"
+                size="lg"
                 onClick={() => onEdit(flashcard)}
-                className="btn-secondary touch-target"
+                className="touch-target bg-white hover:bg-blue-50 border-2 border-blue-200 hover:border-blue-300 px-6 py-3"
               >
-                <Edit2 className="h-4 w-4 mr-2" />
-                Edit
+                <Edit2 className="h-5 w-5 mr-2 text-blue-600" />
+                <span className="text-blue-600 font-medium">Edit</span>
               </Button>
             )}
             
             {onDelete && (
               <Button
                 variant="outline"
+                size="lg"
                 onClick={() => onDelete(flashcard)}
-                className="btn-secondary touch-target text-destructive border-destructive/20 hover:bg-destructive/5"
+                className="touch-target bg-white hover:bg-red-50 border-2 border-red-200 hover:border-red-300 px-6 py-3"
               >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
+                <Trash2 className="h-5 w-5 mr-2 text-red-600" />
+                <span className="text-red-600 font-medium">Delete</span>
               </Button>
             )}
           </div>
         )}
+
+        {/* Swipe Indicators */}
+        <div className="flex justify-between items-center mt-6 px-8">
+          <div className="swipe-indicator text-xs text-muted-foreground">
+            ← Previous
+          </div>
+          <div className="swipe-indicator text-xs text-muted-foreground">
+            Next →
+          </div>
+        </div>
       </div>
     </div>
   );

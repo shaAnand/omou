@@ -56,13 +56,8 @@ const Auth = () => {
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             Omou
           </CardTitle>
-          <CardDescription className="space-y-2">
-            <div className="font-mono border border-muted px-3 py-1 inline-block rounded-sm bg-muted/20">
-              Think Truly
-            </div>
-            <div className="text-sm font-mono text-muted-foreground tracking-wider">
-              Feel | Consider | Reflect
-            </div>
+          <CardDescription>
+            Think Truly - Feel, Consider, Reflect
           </CardDescription>
         </CardHeader>
         <CardContent>

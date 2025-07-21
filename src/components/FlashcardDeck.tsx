@@ -75,21 +75,21 @@ export function FlashcardDeck({ flashcards, onCreateFlashcard, onUpdateFlashcard
 
   if (flashcards.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] animate-fade-in">
-        <div className="text-center element-spacing max-w-md">
-          <div className="space-y-3">
-            <h2 className="heading-secondary">Create Your First Flashcard</h2>
-            <p className="body-text text-muted-foreground">
-              Start building your knowledge with interactive flashcards
+      <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gradient-subtle">
+        <div className="text-center space-y-6">
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold text-foreground">Welcome to Flashcards</h2>
+            <p className="text-muted-foreground">
+              Create your first flashcard to start studying
             </p>
           </div>
           
           <CreateFlashcardModal 
             onCreateFlashcard={handleCreateFlashcard}
             trigger={
-              <Button className="btn-primary touch-target">
+              <Button size="lg" className="btn-primary touch-target">
                 <Plus className="h-5 w-5 mr-2" />
-                Create Flashcard
+                Create First Flashcard
               </Button>
             }
           />
@@ -99,31 +99,33 @@ export function FlashcardDeck({ flashcards, onCreateFlashcard, onUpdateFlashcard
   }
 
   return (
-    <div className="section-spacing">
-      {/* Clean progress indicator */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-3">
-          <span className="caption-text">
-            {currentIndex + 1} of {flashcards.length}
-          </span>
-          <div className="flex items-center gap-3">
+    <div className="relative min-h-screen bg-gradient-subtle">
+      {/* Header - Counter removed */}
+      <div className="fixed top-0 left-0 right-0 z-10 bg-background/80 backdrop-blur-sm border-b">
+        <div className="flex items-center justify-between p-4">
+          <div className="flex items-center">
+            {/* Counter removed - empty space for balance */}
+          </div>
+          
+          <div className="flex items-center space-x-2">
             <Button
-              variant="ghost"
-              size="sm"
+              variant="outline"
+              size="icon"
               onClick={handleRestart}
-              className="btn-ghost"
+              className="touch-target"
             >
-              <RotateCcw className="h-4 w-4 mr-2" />
-              Restart
+              <RotateCcw className="h-4 w-4" />
             </Button>
+            
             <CreateFlashcardModal onCreateFlashcard={handleCreateFlashcard} />
           </div>
         </div>
-        <Progress value={progress} className="h-2 bg-muted" />
+        
+        <Progress value={progress} className="h-1" />
       </div>
 
-      {/* Main flashcard */}
-      <div className="animate-fade-in">
+      {/* Main Content */}
+      <div className="pt-20">
         <FlashcardComponent
           flashcard={currentCard}
           onNext={handleNext}
@@ -133,31 +135,35 @@ export function FlashcardDeck({ flashcards, onCreateFlashcard, onUpdateFlashcard
         />
       </div>
 
-      {/* Clean navigation */}
-      <div className="flex items-center justify-center gap-4 mt-8">
-        <Button
-          variant="outline"
-          onClick={handlePrevious}
-          disabled={flashcards.length <= 1}
-          className="btn-secondary"
-        >
-          <ChevronLeft className="h-4 w-4 mr-2" />
-          Previous
-        </Button>
-        
-        <div className="px-4 py-2 bg-muted rounded-lg">
-          <span className="caption-text">Swipe to navigate</span>
+      {/* Navigation Controls */}
+      <div className="fixed bottom-0 left-0 right-0 z-10 bg-background/80 backdrop-blur-sm border-t">
+        <div className="flex items-center justify-center p-4 space-x-4">
+          <Button
+            variant="outline"
+            onClick={handlePrevious}
+            className="touch-target"
+            disabled={flashcards.length <= 1}
+          >
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Previous
+          </Button>
+          
+          <div className="px-4 py-2 bg-primary/10 rounded-lg">
+            <span className="text-sm font-medium text-primary">
+              Swipe to navigate
+            </span>
+          </div>
+          
+          <Button
+            variant="outline"
+            onClick={handleNext}
+            className="touch-target"
+            disabled={flashcards.length <= 1}
+          >
+            Next
+            <ChevronRight className="h-4 w-4 ml-1" />
+          </Button>
         </div>
-        
-        <Button
-          variant="outline"
-          onClick={handleNext}
-          disabled={flashcards.length <= 1}
-          className="btn-secondary"
-        >
-          Next
-          <ChevronRight className="h-4 w-4 ml-2" />
-        </Button>
       </div>
 
       {/* Edit Modal */}
