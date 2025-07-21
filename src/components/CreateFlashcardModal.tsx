@@ -86,10 +86,10 @@ export function CreateFlashcardModal({ onCreateFlashcard, trigger }: CreateFlash
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!content.trim()) {
+    if (!content.trim() && !image) {
       toast({
         title: "Missing content",
-        description: "Please enter some text for your flashcard.",
+        description: "Please enter text or add an image for your thought.",
         variant: "destructive"
       });
       return;
@@ -133,14 +133,13 @@ export function CreateFlashcardModal({ onCreateFlashcard, trigger }: CreateFlash
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Content */}
           <div className="space-y-2">
-            <Label htmlFor="content">Enter your text here *</Label>
+            <Label htmlFor="content">Enter your text here (text or image required)</Label>
             <Textarea
               id="content"
-              placeholder="Type your flashcard content..."
+              placeholder="Type your thought content..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
               className="min-h-24"
-              required
             />
           </div>
 
