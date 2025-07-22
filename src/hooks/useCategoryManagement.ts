@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useAuth } from './useAuth';
 import { useProfile } from './useProfile';
@@ -7,7 +8,7 @@ import { toast } from 'sonner';
 export const useCategoryManagement = () => {
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
-  const { refetch } = useProfile();
+  const { refetch, forceRefresh } = useProfile();
 
   const addSampleThoughtsForCategories = async (selectedCategories: string[]) => {
     if (!user) return;
@@ -86,8 +87,9 @@ export const useCategoryManagement = () => {
         throw profileError;
       }
 
-      // Refresh profile to trigger UI update
-      await refetch();
+      // Force refresh profile to ensure UI updates
+      await new Promise(resolve => setTimeout(resolve, 100));
+      forceRefresh();
 
       toast.success(`🎉 Added ${categoriesToAdd.length} new categories with ${thoughtsCount} sample thoughts!`);
       return true;
@@ -110,7 +112,7 @@ export const useCategoryManagement = () => {
       console.log(`Starting deletion of category: ${categoryToRemove}`);
       console.log('Current categories:', existingCategories);
       
-      // Step 1: Remove category from profile first
+      // Step 1: Update profile first (remove category from selected_categories)
       const updatedCategories = existingCategories.filter(cat => cat !== categoryToRemove);
       console.log('Updated categories after removal:', updatedCategories);
 
@@ -129,36 +131,23 @@ export const useCategoryManagement = () => {
       console.log('Profile updated successfully');
 
       // Step 2: Delete flashcards for this category
-      // Handle both actual category matches AND null categories if user only has one category
-      let deleteQuery = supabase
+      // Handle both category matches AND null categories (legacy data)
+      const { error: deleteError, count } = await supabase
         .from('flashcards')
         .delete({ count: 'exact' })
-        .eq('user_id', user.id);
-
-      // If this is the last category being removed, delete all flashcards
-      // Otherwise, only delete flashcards with matching category
-      if (updatedCategories.length === 0) {
-        console.log('Deleting all flashcards as no categories remain');
-        // Delete all flashcards for this user since no categories remain
-      } else {
-        console.log('Deleting flashcards with category:', categoryToRemove);
-        deleteQuery = deleteQuery.eq('category', categoryToRemove);
-      }
-
-      const { error: deleteError, count } = await deleteQuery;
+        .eq('user_id', user.id)
+        .or(`category.eq.${categoryToRemove},category.is.null`);
 
       if (deleteError) {
         console.error('Error deleting flashcards:', deleteError);
-        // Don't throw here - profile update was successful
         console.warn('Profile updated but some flashcards may not have been deleted');
       } else {
         console.log(`Deleted ${count || 0} flashcards for category: ${categoryToRemove}`);
       }
 
-      // Step 3: Refresh profile data to trigger UI updates
-      console.log('Refreshing profile data...');
-      await refetch();
-      console.log('Profile data refreshed');
+      // Step 3: Force immediate profile refresh
+      await new Promise(resolve => setTimeout(resolve, 100));
+      forceRefresh();
       
       toast.success(`Successfully removed "${categoryToRemove}" category${count ? ` and ${count} associated thoughts` : ''}`);
       return true;

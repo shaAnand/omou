@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useProfile } from './useProfile';
@@ -16,8 +16,9 @@ export const useCategoriesMatrix = () => {
   const [categories, setCategories] = useState<CategoryData[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [optimisticCategories, setOptimisticCategories] = useState<CategoryData[]>([]);
   const { user } = useAuth();
-  const { profile, loading: profileLoading } = useProfile();
+  const { profile, loading: profileLoading, forceRefresh } = useProfile();
   const { toast } = useToast();
 
   const categoryEmojis: Record<string, string> = {
@@ -29,27 +30,30 @@ export const useCategoriesMatrix = () => {
     'Spirituality': '✨'
   };
 
-  const fetchCategoriesData = async () => {
-    if (!user || !profile?.selected_categories || profileLoading) {
-      console.log('Not fetching categories - missing user/profile or profile loading', { 
-        user: !!user, 
-        profile: !!profile, 
-        selectedCategories: profile?.selected_categories,
-        profileLoading 
-      });
+  const fetchCategoriesData = useCallback(async () => {
+    if (!user || profileLoading) {
+      console.log('useCategoriesMatrix: Not fetching - no user or profile loading');
       setCategories([]);
+      setOptimisticCategories([]);
+      return;
+    }
+
+    const selectedCategories = profile?.selected_categories;
+    if (!selectedCategories || selectedCategories.length === 0) {
+      console.log('useCategoriesMatrix: No selected categories');
+      setCategories([]);
+      setOptimisticCategories([]);
       return;
     }
     
-    console.log('Fetching categories data for:', profile.selected_categories);
+    console.log('useCategoriesMatrix: Fetching categories data for:', selectedCategories);
     setLoading(true);
     
     try {
       const categoriesData: CategoryData[] = [];
       
-      for (const categoryName of profile.selected_categories) {
+      for (const categoryName of selectedCategories) {
         // Get count of user's thoughts for this category
-        // Include both matching categories AND null categories for backward compatibility
         const { count, error } = await supabase
           .from('flashcards')
           .select('*', { count: 'exact', head: true })
@@ -79,10 +83,11 @@ export const useCategoriesMatrix = () => {
         });
       }
 
-      console.log('Fetched categories data:', categoriesData);
+      console.log('useCategoriesMatrix: Successfully fetched categories:', categoriesData);
       setCategories(categoriesData);
+      setOptimisticCategories(categoriesData);
     } catch (error) {
-      console.error('Error fetching categories data:', error);
+      console.error('useCategoriesMatrix: Error fetching categories data:', error);
       toast({
         title: "Error",
         description: "Failed to load categories data",
@@ -91,7 +96,30 @@ export const useCategoriesMatrix = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id, profile?.selected_categories, profileLoading, categoryEmojis, toast]);
+
+  // Optimistic update for immediate UI feedback
+  const optimisticallyRemoveCategory = useCallback((categoryName: string) => {
+    console.log('useCategoriesMatrix: Optimistically removing category:', categoryName);
+    setOptimisticCategories(prev => prev.filter(cat => cat.name !== categoryName));
+  }, []);
+
+  // Rollback optimistic update if operation fails
+  const rollbackOptimisticUpdate = useCallback(() => {
+    console.log('useCategoriesMatrix: Rolling back optimistic update');
+    setOptimisticCategories(categories);
+  }, [categories]);
+
+  // Force refresh with profile sync
+  const refreshWithProfileSync = useCallback(async () => {
+    console.log('useCategoriesMatrix: Refreshing with profile sync');
+    // First force refresh the profile
+    forceRefresh();
+    // Give profile time to update, then fetch categories
+    setTimeout(() => {
+      fetchCategoriesData();
+    }, 100);
+  }, [forceRefresh, fetchCategoriesData]);
 
   const selectCategory = (categoryName: string) => {
     setSelectedCategory(categoryName);
@@ -101,26 +129,36 @@ export const useCategoriesMatrix = () => {
     setSelectedCategory(null);
   };
 
-  // Effect that properly responds to profile changes
+  // Use a more reliable dependency tracking
   useEffect(() => {
-    console.log('useCategoriesMatrix effect triggered', { 
-      user: !!user, 
+    console.log('useCategoriesMatrix: Effect triggered', { 
+      userId: user?.id, 
       profileLoading, 
-      selectedCategories: profile?.selected_categories 
+      selectedCategories: profile?.selected_categories,
+      profileLastUpdated: (profile as any)?._lastUpdated
     });
     
-    // Only fetch if we have user and profile is loaded
     if (user && !profileLoading) {
       fetchCategoriesData();
     }
-  }, [user?.id, profile?.selected_categories, profileLoading]);
+  }, [
+    user?.id, 
+    profileLoading,
+    // Use JSON.stringify to ensure array changes are detected
+    JSON.stringify(profile?.selected_categories || []),
+    // Include the profile update timestamp to force refresh
+    (profile as any)?._lastUpdated
+  ]);
 
   return {
-    categories,
+    categories: optimisticCategories,
     loading: loading || profileLoading,
     selectedCategory,
     selectCategory,
     goBackToMatrix,
-    refetch: fetchCategoriesData
+    refetch: fetchCategoriesData,
+    optimisticallyRemoveCategory,
+    rollbackOptimisticUpdate,
+    refreshWithProfileSync
   };
 };

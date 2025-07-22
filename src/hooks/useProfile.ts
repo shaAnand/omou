@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from './useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -16,19 +17,18 @@ interface Profile {
 export const useProfile = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      fetchProfile();
-    } else {
+  const fetchProfile = useCallback(async () => {
+    if (!user) {
       setProfile(null);
       setLoading(false);
+      return;
     }
-  }, [user]);
 
-  const fetchProfile = async () => {
-    if (!user) return;
+    console.log('useProfile: Fetching profile for user:', user.id);
+    setLoading(true);
 
     try {
       const { data, error } = await supabase
@@ -38,17 +38,40 @@ export const useProfile = () => {
         .single();
 
       if (error) {
-        console.error('Error fetching profile:', error);
+        console.error('useProfile: Error fetching profile:', error);
+        setProfile(null);
         return;
       }
 
-      setProfile(data);
+      console.log('useProfile: Successfully fetched profile:', data);
+      // Force React to detect changes by creating a completely new object
+      setProfile({ 
+        ...data,
+        // Add a timestamp to ensure React detects the change
+        _lastUpdated: Date.now()
+      } as Profile);
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      console.error('useProfile: Exception fetching profile:', error);
+      setProfile(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id, refreshTrigger]);
 
-  return { profile, loading, refetch: fetchProfile };
+  // Force refresh function that triggers a re-fetch
+  const forceRefresh = useCallback(() => {
+    console.log('useProfile: Force refresh triggered');
+    setRefreshTrigger(prev => prev + 1);
+  }, []);
+
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
+  return { 
+    profile, 
+    loading, 
+    refetch: fetchProfile,
+    forceRefresh
+  };
 };

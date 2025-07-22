@@ -17,7 +17,10 @@ const Categories = () => {
     loading,
     selectedCategory,
     selectCategory,
-    goBackToMatrix
+    goBackToMatrix,
+    optimisticallyRemoveCategory,
+    rollbackOptimisticUpdate,
+    refreshWithProfileSync
   } = useCategoriesMatrix();
   
   const { user, loading: authLoading, signOut } = useAuth();
@@ -50,6 +53,10 @@ const Categories = () => {
     
     if (success) {
       setShowCategorySelection(false);
+      // Force refresh to ensure UI updates
+      setTimeout(() => {
+        refreshWithProfileSync();
+      }, 200);
     }
   };
 
@@ -60,17 +67,28 @@ const Categories = () => {
     
     try {
       console.log(`Categories page: Attempting to delete category: ${categoryName}`);
+      
+      // Optimistically remove from UI immediately
+      optimisticallyRemoveCategory(categoryName);
+      
       const existingCategories = profile?.selected_categories || [];
       const success = await removeUserCategory(categoryName, existingCategories);
       
       if (success) {
         console.log('Categories page: Category deletion successful');
-        // The hooks will automatically handle the UI refresh
+        // Force a complete refresh to ensure UI is in sync
+        setTimeout(() => {
+          refreshWithProfileSync();
+        }, 200);
       } else {
         console.error('Categories page: Category deletion failed');
+        // Rollback optimistic update
+        rollbackOptimisticUpdate();
       }
     } catch (error) {
       console.error('Categories page: Error in handleDeleteCategory:', error);
+      // Rollback optimistic update on error
+      rollbackOptimisticUpdate();
     } finally {
       setDeletingCategory(null);
     }
