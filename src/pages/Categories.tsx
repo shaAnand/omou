@@ -23,7 +23,7 @@ const Categories = () => {
   
   const { user, loading: authLoading, signOut } = useAuth();
   const { profile, loading: profileLoading } = useProfile();
-  const { updateUserCategories, loading: categoryUpdateLoading } = useCategoryManagement();
+  const { mergeUserCategories, removeUserCategory, loading: categoryUpdateLoading } = useCategoryManagement();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   
@@ -45,10 +45,22 @@ const Categories = () => {
   };
 
   const handleCategorySelectionComplete = async (selectedCategories: string[]) => {
-    const success = await updateUserCategories(selectedCategories);
+    const existingCategories = profile?.selected_categories || [];
+    const success = await mergeUserCategories(selectedCategories, existingCategories);
+    
     if (success) {
       setShowCategorySelection(false);
       // Refresh the categories data to show the new categories
+      await refetch();
+    }
+  };
+
+  const handleDeleteCategory = async (categoryName: string) => {
+    const existingCategories = profile?.selected_categories || [];
+    const success = await removeUserCategory(categoryName, existingCategories);
+    
+    if (success) {
+      // Refresh the categories data to show remaining categories
       await refetch();
     }
   };
@@ -102,6 +114,7 @@ const Categories = () => {
                 loading={loading || categoryUpdateLoading}
                 onCategorySelect={selectCategory}
                 onAddCategories={handleAddCategories}
+                onDeleteCategory={handleDeleteCategory}
               />
             </div>
           )}
@@ -113,6 +126,7 @@ const Categories = () => {
         onOpenChange={setShowCategorySelection}
         onComplete={handleCategorySelectionComplete}
         initialSelectedCategories={profile?.selected_categories || []}
+        mode="add"
       />
     </div>
   );

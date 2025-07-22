@@ -30,12 +30,19 @@ export const useCategoryManagement = () => {
       }
     }
 
-    // Insert sample thoughts as user's flashcards
+    // Insert sample thoughts as user's flashcards with category tags
     if (sampleThoughts.length > 0) {
-      const flashcardsToInsert = sampleThoughts.map(content => ({
-        user_id: user.id,
-        content
-      }));
+      const flashcardsToInsert = sampleThoughts.map((content, index) => {
+        // Find which category this thought belongs to
+        const categoryIndex = Math.floor(index / (sampleThoughts.length / selectedCategories.length));
+        const category = selectedCategories[categoryIndex] || selectedCategories[0];
+        
+        return {
+          user_id: user.id,
+          content,
+          category
+        };
+      });
 
       const { error: insertError } = await supabase
         .from('flashcards')
@@ -49,19 +56,25 @@ export const useCategoryManagement = () => {
     return sampleThoughts.length;
   };
 
-  const updateUserCategories = async (selectedCategories: string[]) => {
-    if (!user) return;
+  const mergeUserCategories = async (newCategories: string[], existingCategories: string[] = []) => {
+    if (!user) return false;
 
     setLoading(true);
     try {
-      // Add sample thoughts for selected categories
-      const thoughtsCount = await addSampleThoughtsForCategories(selectedCategories);
+      // Merge categories - only add new ones
+      const categoriesToAdd = newCategories.filter(cat => !existingCategories.includes(cat));
+      const updatedCategories = [...existingCategories, ...categoriesToAdd];
 
-      // Update profile with selected categories
+      // Add sample thoughts only for new categories
+      const thoughtsCount = categoriesToAdd.length > 0 
+        ? await addSampleThoughtsForCategories(categoriesToAdd)
+        : 0;
+
+      // Update profile with merged categories
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
-          selected_categories: selectedCategories
+          selected_categories: updatedCategories
         })
         .eq('user_id', user.id);
 
@@ -72,10 +85,15 @@ export const useCategoryManagement = () => {
       // Refresh profile data
       await refetch();
 
-      toast.success(`🎉 Added ${selectedCategories.length} categories with ${thoughtsCount} sample thoughts!`);
+      if (categoriesToAdd.length > 0) {
+        toast.success(`🎉 Added ${categoriesToAdd.length} new categories with ${thoughtsCount} sample thoughts!`);
+      } else {
+        toast.info('No new categories to add');
+      }
+      
       return true;
     } catch (error) {
-      console.error('Error updating categories:', error);
+      console.error('Error merging categories:', error);
       toast.error('Failed to update categories. Please try again.');
       return false;
     } finally {
@@ -83,8 +101,61 @@ export const useCategoryManagement = () => {
     }
   };
 
+  const removeUserCategory = async (categoryToRemove: string, existingCategories: string[] = []) => {
+    if (!user) return false;
+
+    setLoading(true);
+    try {
+      // Remove category from list
+      const updatedCategories = existingCategories.filter(cat => cat !== categoryToRemove);
+
+      // Remove all flashcards for this category
+      const { error: deleteError } = await supabase
+        .from('flashcards')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('category', categoryToRemove);
+
+      if (deleteError) {
+        console.error('Error deleting flashcards:', deleteError);
+        // Continue even if flashcard deletion fails
+      }
+
+      // Update profile with remaining categories
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          selected_categories: updatedCategories
+        })
+        .eq('user_id', user.id);
+
+      if (profileError) {
+        throw profileError;
+      }
+
+      // Refresh profile data
+      await refetch();
+
+      toast.success(`Removed "${categoryToRemove}" category and all its thoughts`);
+      return true;
+    } catch (error) {
+      console.error('Error removing category:', error);
+      toast.error('Failed to remove category. Please try again.');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Legacy method for backward compatibility
+  const updateUserCategories = async (selectedCategories: string[]) => {
+    return await mergeUserCategories(selectedCategories, []);
+  };
+
   return {
     updateUserCategories,
+    mergeUserCategories,
+    removeUserCategory,
     loading
   };
 };
