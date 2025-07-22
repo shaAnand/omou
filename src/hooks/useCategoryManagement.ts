@@ -109,11 +109,12 @@ export const useCategoryManagement = () => {
     try {
       console.log(`Starting deletion of category: ${categoryToRemove}`);
       
-      // Remove category from list
+      // Step 1: Remove category from list
       const updatedCategories = existingCategories.filter(cat => cat !== categoryToRemove);
       console.log('Updated categories after removal:', updatedCategories);
 
-      // First, delete all flashcards for this category
+      // Step 2: Delete all flashcards for this category
+      console.log('Deleting flashcards...');
       const { error: deleteError, count } = await supabase
         .from('flashcards')
         .delete({ count: 'exact' })
@@ -127,32 +128,27 @@ export const useCategoryManagement = () => {
 
       console.log(`Deleted ${count || 0} flashcards for category: ${categoryToRemove}`);
 
-      // Then, update profile with remaining categories
+      // Step 3: Update profile with remaining categories
       console.log('Updating profile with categories:', updatedCategories);
-      const { error: profileError, data: profileData } = await supabase
+      const { error: profileError } = await supabase
         .from('profiles')
         .update({
           selected_categories: updatedCategories
         })
-        .eq('user_id', user.id)
-        .select('selected_categories')
-        .single();
+        .eq('user_id', user.id);
 
       if (profileError) {
         console.error('Error updating profile:', profileError);
         throw new Error(`Failed to update profile: ${profileError.message}`);
       }
 
-      console.log('Profile updated successfully with data:', profileData);
-
       console.log('Profile updated successfully');
 
-      // Wait for profile data to be properly refreshed
-      await new Promise(resolve => setTimeout(resolve, 500)); // Brief delay to ensure DB consistency
+      // Step 4: Refresh profile data and let useCategoriesMatrix respond to the change
+      console.log('Refreshing profile data...');
       await refetch();
+      console.log('Profile data refreshed');
       
-      console.log('Profile data refetched');
-
       toast.success(`Successfully removed "${categoryToRemove}" category and ${count || 0} associated thoughts`);
       return true;
       

@@ -17,8 +17,7 @@ const Categories = () => {
     loading,
     selectedCategory,
     selectCategory,
-    goBackToMatrix,
-    refetch
+    goBackToMatrix
   } = useCategoriesMatrix();
   
   const { user, loading: authLoading, signOut } = useAuth();
@@ -51,10 +50,6 @@ const Categories = () => {
     
     if (success) {
       setShowCategorySelection(false);
-      // Wait a moment for database consistency, then refresh
-      setTimeout(async () => {
-        await refetch();
-      }, 600);
     }
   };
 
@@ -69,16 +64,9 @@ const Categories = () => {
       const success = await removeUserCategory(categoryName, existingCategories);
       
       if (success) {
-        console.log('Category deletion successful, refreshing data...');
-        // Wait for the database operations to complete and profile to update
-        setTimeout(async () => {
-          try {
-            await refetch();
-            console.log('Categories data refreshed after deletion');
-          } catch (refreshError) {
-            console.error('Error refreshing categories after deletion:', refreshError);
-          }
-        }, 800); // Slightly longer delay to ensure DB consistency
+        console.log('Category deletion successful');
+        // No need for manual refresh - useCategoriesMatrix will automatically update
+        // when it detects the profile.selected_categories has changed
       }
     } catch (error) {
       console.error('Error in handleDeleteCategory:', error);

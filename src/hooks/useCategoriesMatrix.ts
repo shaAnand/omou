@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -16,7 +17,7 @@ export const useCategoriesMatrix = () => {
   const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { user } = useAuth();
-  const { profile } = useProfile();
+  const { profile, loading: profileLoading } = useProfile();
   const { toast } = useToast();
 
   const categoryEmojis: Record<string, string> = {
@@ -29,9 +30,19 @@ export const useCategoriesMatrix = () => {
   };
 
   const fetchCategoriesData = async () => {
-    if (!user || !profile?.selected_categories) return;
+    if (!user || !profile?.selected_categories || profileLoading) {
+      console.log('Not fetching categories - missing user/profile or profile loading', { 
+        user: !!user, 
+        profile: !!profile, 
+        selectedCategories: profile?.selected_categories,
+        profileLoading 
+      });
+      return;
+    }
     
+    console.log('Fetching categories data for:', profile.selected_categories);
     setLoading(true);
+    
     try {
       const categoriesData: CategoryData[] = [];
       
@@ -66,6 +77,7 @@ export const useCategoriesMatrix = () => {
         });
       }
 
+      console.log('Fetched categories data:', categoriesData);
       setCategories(categoriesData);
     } catch (error) {
       console.error('Error fetching categories data:', error);
@@ -87,13 +99,22 @@ export const useCategoriesMatrix = () => {
     setSelectedCategory(null);
   };
 
+  // Effect that properly responds to profile changes
   useEffect(() => {
-    fetchCategoriesData();
-  }, [user, profile?.selected_categories]);
+    console.log('useCategoriesMatrix effect triggered', { 
+      user: !!user, 
+      profileLoading, 
+      selectedCategories: profile?.selected_categories 
+    });
+    
+    if (!profileLoading) {
+      fetchCategoriesData();
+    }
+  }, [user?.id, profile?.selected_categories, profileLoading]);
 
   return {
     categories,
-    loading,
+    loading: loading || profileLoading,
     selectedCategory,
     selectCategory,
     goBackToMatrix,
