@@ -44,20 +44,26 @@ export const useAuth = () => {
     });
 
     if (error) {
+      console.error('Signup error:', error);
       toast({
         title: "Sign up failed",
         description: error.message,
         variant: "destructive",
+        duration: 5000,
       });
-      return { error };
+      return { error, success: false };
     }
 
+    // Always show success message for signup
+    console.log('Signup successful, showing toast');
     toast({
-      title: "Check your email",
-      description: "We sent you a confirmation link to complete your registration.",
+      title: "Registration successful! 📧",
+      description: "Please check your email and click the confirmation link to complete your registration.",
+      duration: 8000, // Longer duration for important message
+      className: "border-green-500 bg-green-50 text-green-900",
     });
 
-    return { data, error: null };
+    return { data, error: null, success: true };
   };
 
   const signIn = async (email: string, password: string) => {

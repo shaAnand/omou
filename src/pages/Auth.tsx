@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -7,13 +8,14 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import { Mail, Lock, Chrome, Facebook, User } from 'lucide-react';
+import { Mail, Lock, Chrome, Facebook, User, CheckCircle } from 'lucide-react';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [nickname, setNickname] = useState('');
   const [loading, setLoading] = useState(false);
+  const [signupSuccess, setSignupSuccess] = useState(false);
   const { user, signUp, signIn, signInWithGoogle, signInWithFacebook } = useAuth();
   const navigate = useNavigate();
 
@@ -23,10 +25,28 @@ const Auth = () => {
     }
   }, [user, navigate]);
 
+  const clearForm = () => {
+    setEmail('');
+    setPassword('');
+    setNickname('');
+  };
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    await signUp(email, password, nickname);
+    setSignupSuccess(false);
+    
+    console.log('Starting signup process...');
+    const result = await signUp(email, password, nickname);
+    
+    if (result.success) {
+      console.log('Signup successful, clearing form and showing success state');
+      clearForm();
+      setSignupSuccess(true);
+      // Reset success state after 10 seconds
+      setTimeout(() => setSignupSuccess(false), 10000);
+    }
+    
     setLoading(false);
   };
 
@@ -106,6 +126,18 @@ const Auth = () => {
             </TabsContent>
             
             <TabsContent value="signup" className="space-y-4">
+              {signupSuccess && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <div>
+                      <h4 className="font-medium text-green-800">Registration Successful!</h4>
+                      <p className="text-sm text-green-700">Please check your email and click the confirmation link to complete your registration.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signup-nickname">Nickname</Label>
