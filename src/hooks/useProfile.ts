@@ -22,7 +22,6 @@ export const useProfile = () => {
 
   const fetchProfile = useCallback(async () => {
     if (!user) {
-      console.log('useProfile: No user, setting profile to null');
       setProfile(null);
       setLoading(false);
       return;
@@ -44,19 +43,13 @@ export const useProfile = () => {
         return;
       }
 
-      console.log('useProfile: Successfully fetched profile with categories:', data?.selected_categories);
-      
-      // Create a completely new object to ensure React detects the change
-      const newProfile = {
+      console.log('useProfile: Successfully fetched profile:', data);
+      // Force React to detect changes by creating a completely new object
+      setProfile({ 
         ...data,
-        // Force React to detect changes by adding a timestamp
-        _lastUpdated: Date.now(),
-        // Ensure selected_categories is always an array
-        selected_categories: data.selected_categories || []
-      } as Profile & { _lastUpdated: number };
-      
-      setProfile(newProfile);
-      console.log('useProfile: Profile state updated with timestamp:', newProfile._lastUpdated);
+        // Add a timestamp to ensure React detects the change
+        _lastUpdated: Date.now()
+      } as Profile);
     } catch (error) {
       console.error('useProfile: Exception fetching profile:', error);
       setProfile(null);
@@ -67,16 +60,11 @@ export const useProfile = () => {
 
   // Force refresh function that triggers a re-fetch
   const forceRefresh = useCallback(() => {
-    console.log('useProfile: Force refresh triggered - incrementing refresh trigger');
-    setRefreshTrigger(prev => {
-      const newValue = prev + 1;
-      console.log('useProfile: Refresh trigger updated from', prev, 'to', newValue);
-      return newValue;
-    });
+    console.log('useProfile: Force refresh triggered');
+    setRefreshTrigger(prev => prev + 1);
   }, []);
 
   useEffect(() => {
-    console.log('useProfile: Effect triggered, refreshTrigger:', refreshTrigger);
     fetchProfile();
   }, [fetchProfile]);
 

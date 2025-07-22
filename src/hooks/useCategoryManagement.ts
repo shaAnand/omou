@@ -87,7 +87,8 @@ export const useCategoryManagement = () => {
         throw profileError;
       }
 
-      console.log('Profile updated successfully, forcing refresh');
+      // Force refresh profile to ensure UI updates
+      await new Promise(resolve => setTimeout(resolve, 100));
       forceRefresh();
 
       toast.success(`🎉 Added ${categoriesToAdd.length} new categories with ${thoughtsCount} sample thoughts!`);
@@ -109,7 +110,7 @@ export const useCategoryManagement = () => {
     
     try {
       console.log(`Starting deletion of category: ${categoryToRemove}`);
-      console.log('Current categories before deletion:', existingCategories);
+      console.log('Current categories:', existingCategories);
       
       // Step 1: Update profile first (remove category from selected_categories)
       const updatedCategories = existingCategories.filter(cat => cat !== categoryToRemove);
@@ -130,11 +131,12 @@ export const useCategoryManagement = () => {
       console.log('Profile updated successfully');
 
       // Step 2: Delete flashcards for this category
+      // Handle both category matches AND null categories (legacy data)
       const { error: deleteError, count } = await supabase
         .from('flashcards')
         .delete({ count: 'exact' })
         .eq('user_id', user.id)
-        .eq('category', categoryToRemove);
+        .or(`category.eq.${categoryToRemove},category.is.null`);
 
       if (deleteError) {
         console.error('Error deleting flashcards:', deleteError);
@@ -143,8 +145,8 @@ export const useCategoryManagement = () => {
         console.log(`Deleted ${count || 0} flashcards for category: ${categoryToRemove}`);
       }
 
-      // Step 3: Force profile refresh to trigger UI updates
-      console.log('Forcing profile refresh to update UI');
+      // Step 3: Force immediate profile refresh
+      await new Promise(resolve => setTimeout(resolve, 100));
       forceRefresh();
       
       toast.success(`Successfully removed "${categoryToRemove}" category${count ? ` and ${count} associated thoughts` : ''}`);
