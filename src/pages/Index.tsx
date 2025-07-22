@@ -28,15 +28,18 @@ const Index = () => {
   };
 
   const handleOnboardingComplete = async (selectedCategories?: string[]) => {
-    // Refresh flashcards after onboarding
+    // Refresh flashcards after onboarding to get the latest data
     await refetchFlashcards();
     
-    // Navigate based on whether categories were selected
+    // Smart navigation based on user's choice and existing flashcards
     if (selectedCategories && selectedCategories.length > 0) {
       // If categories were selected, go to categories page
       navigate('/categories');
     } else {
-      // If no categories selected (skip), stay on main page to create thoughts
+      // If no categories selected (skip or close), stay on main page
+      // The FlashcardDeck component will handle showing either:
+      // - Existing flashcards if they exist
+      // - "Create First Flashcard" interface if no flashcards exist
       // No navigation needed as user is already on the main page
     }
   };

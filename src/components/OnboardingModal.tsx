@@ -54,6 +54,7 @@ const categories = [
 export const OnboardingModal = ({ open, onComplete }: OnboardingModalProps) => {
   const [step, setStep] = useState(1);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [isCompleting, setIsCompleting] = useState(false);
   const { addSampleThoughts, loading } = useOnboarding();
 
   const handleCategoryToggle = (categoryId: string) => {
@@ -65,6 +66,7 @@ export const OnboardingModal = ({ open, onComplete }: OnboardingModalProps) => {
   };
 
   const handleComplete = async () => {
+    setIsCompleting(true);
     try {
       await addSampleThoughts(selectedCategories);
       toast.success(`🎉 Welcome! Added sample thoughts from ${selectedCategories.length} categories.`);
@@ -72,10 +74,13 @@ export const OnboardingModal = ({ open, onComplete }: OnboardingModalProps) => {
     } catch (error) {
       console.error('Failed to add sample thoughts:', error);
       toast.error('Failed to complete onboarding. Please try again.');
+    } finally {
+      setIsCompleting(false);
     }
   };
 
   const handleSkip = async () => {
+    setIsCompleting(true);
     try {
       await addSampleThoughts([]);
       toast.success('🎉 Welcome! You can start creating your own thoughts.');
@@ -83,13 +88,15 @@ export const OnboardingModal = ({ open, onComplete }: OnboardingModalProps) => {
     } catch (error) {
       console.error('Failed to complete onboarding:', error);
       toast.error('Failed to complete onboarding. Please try again.');
+    } finally {
+      setIsCompleting(false);
     }
   };
 
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
+  const handleOpenChange = async (open: boolean) => {
+    if (!open && !isCompleting) {
       // When dialog is closed via X button, treat it as skip
-      handleSkip();
+      await handleSkip();
     }
   };
 
@@ -116,10 +123,18 @@ export const OnboardingModal = ({ open, onComplete }: OnboardingModalProps) => {
               </div>
             </div>
             <div className="flex gap-3 justify-center">
-              <Button onClick={handleSkip} variant="outline">
+              <Button 
+                onClick={handleSkip} 
+                variant="outline"
+                disabled={isCompleting || loading}
+              >
+                {isCompleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Skip & Start Empty
               </Button>
-              <Button onClick={() => setStep(2)}>
+              <Button 
+                onClick={() => setStep(2)}
+                disabled={isCompleting || loading}
+              >
                 Choose Categories
               </Button>
             </div>
@@ -146,17 +161,26 @@ export const OnboardingModal = ({ open, onComplete }: OnboardingModalProps) => {
             </div>
 
             <div className="flex gap-3 justify-center pt-4">
-              <Button onClick={() => setStep(1)} variant="outline">
+              <Button 
+                onClick={() => setStep(1)} 
+                variant="outline"
+                disabled={isCompleting || loading}
+              >
                 Back
               </Button>
-              <Button onClick={handleSkip} variant="outline">
+              <Button 
+                onClick={handleSkip} 
+                variant="outline"
+                disabled={isCompleting || loading}
+              >
+                {isCompleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Skip
               </Button>
               <Button 
                 onClick={handleComplete} 
-                disabled={loading || selectedCategories.length === 0}
+                disabled={isCompleting || loading || selectedCategories.length === 0}
               >
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {(isCompleting || loading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Add {selectedCategories.length} Categories
               </Button>
             </div>
