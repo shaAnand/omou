@@ -37,6 +37,7 @@ export const useCategoriesMatrix = () => {
         selectedCategories: profile?.selected_categories,
         profileLoading 
       });
+      setCategories([]);
       return;
     }
     
@@ -48,11 +49,12 @@ export const useCategoriesMatrix = () => {
       
       for (const categoryName of profile.selected_categories) {
         // Get count of user's thoughts for this category
+        // Include both matching categories AND null categories for backward compatibility
         const { count, error } = await supabase
           .from('flashcards')
           .select('*', { count: 'exact', head: true })
           .eq('user_id', user.id)
-          .eq('category', categoryName);
+          .or(`category.eq.${categoryName},category.is.null`);
 
         if (error) {
           console.error(`Error fetching count for ${categoryName}:`, error);
@@ -64,10 +66,10 @@ export const useCategoriesMatrix = () => {
           .from('flashcards')
           .select('updated_at')
           .eq('user_id', user.id)
-          .eq('category', categoryName)
+          .or(`category.eq.${categoryName},category.is.null`)
           .order('updated_at', { ascending: false })
           .limit(1)
-          .single();
+          .maybeSingle();
 
         categoriesData.push({
           name: categoryName,
@@ -107,7 +109,8 @@ export const useCategoriesMatrix = () => {
       selectedCategories: profile?.selected_categories 
     });
     
-    if (!profileLoading) {
+    // Only fetch if we have user and profile is loaded
+    if (user && !profileLoading) {
       fetchCategoriesData();
     }
   }, [user?.id, profile?.selected_categories, profileLoading]);

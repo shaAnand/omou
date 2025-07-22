@@ -59,17 +59,18 @@ const Categories = () => {
     setDeletingCategory(categoryName);
     
     try {
-      console.log(`Attempting to delete category: ${categoryName}`);
+      console.log(`Categories page: Attempting to delete category: ${categoryName}`);
       const existingCategories = profile?.selected_categories || [];
       const success = await removeUserCategory(categoryName, existingCategories);
       
       if (success) {
-        console.log('Category deletion successful');
-        // No need for manual refresh - useCategoriesMatrix will automatically update
-        // when it detects the profile.selected_categories has changed
+        console.log('Categories page: Category deletion successful');
+        // The hooks will automatically handle the UI refresh
+      } else {
+        console.error('Categories page: Category deletion failed');
       }
     } catch (error) {
-      console.error('Error in handleDeleteCategory:', error);
+      console.error('Categories page: Error in handleDeleteCategory:', error);
     } finally {
       setDeletingCategory(null);
     }

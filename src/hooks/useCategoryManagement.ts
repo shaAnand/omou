@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useAuth } from './useAuth';
 import { useProfile } from './useProfile';
@@ -13,7 +12,8 @@ export const useCategoryManagement = () => {
   const addSampleThoughtsForCategories = async (selectedCategories: string[]) => {
     if (!user) return;
 
-    const sampleThoughts: string[] = [];
+    console.log('Adding sample thoughts for categories:', selectedCategories);
+    let totalThoughtsAdded = 0;
     
     for (const category of selectedCategories) {
       const { data, error } = await supabase.rpc('get_sample_thoughts', {
@@ -25,35 +25,30 @@ export const useCategoryManagement = () => {
         continue;
       }
       
-      if (data) {
-        sampleThoughts.push(...data.map((item: { content: string }) => item.content));
-      }
-    }
-
-    // Insert sample thoughts as user's flashcards with category tags
-    if (sampleThoughts.length > 0) {
-      const flashcardsToInsert = sampleThoughts.map((content, index) => {
-        // Find which category this thought belongs to
-        const categoryIndex = Math.floor(index / (sampleThoughts.length / selectedCategories.length));
-        const category = selectedCategories[categoryIndex] || selectedCategories[0];
-        
-        return {
+      if (data && data.length > 0) {
+        // Insert sample thoughts with proper category assignment
+        const flashcardsToInsert = data.map((item: { content: string }) => ({
           user_id: user.id,
-          content,
-          category
-        };
-      });
+          content: item.content,
+          category: category // Ensure category is properly set
+        }));
 
-      const { error: insertError } = await supabase
-        .from('flashcards')
-        .insert(flashcardsToInsert);
+        const { error: insertError } = await supabase
+          .from('flashcards')
+          .insert(flashcardsToInsert);
 
-      if (insertError) {
-        throw insertError;
+        if (insertError) {
+          console.error(`Error inserting flashcards for ${category}:`, insertError);
+          throw insertError;
+        }
+
+        totalThoughtsAdded += data.length;
+        console.log(`Added ${data.length} thoughts for category ${category}`);
       }
     }
 
-    return sampleThoughts.length;
+    console.log(`Total thoughts added: ${totalThoughtsAdded}`);
+    return totalThoughtsAdded;
   };
 
   const mergeUserCategories = async (newCategories: string[], existingCategories: string[] = []) => {
@@ -61,16 +56,24 @@ export const useCategoryManagement = () => {
 
     setLoading(true);
     try {
-      // Merge categories - only add new ones
+      console.log('Merging categories:', { newCategories, existingCategories });
+      
+      // Only add truly new categories
       const categoriesToAdd = newCategories.filter(cat => !existingCategories.includes(cat));
+      console.log('Categories to add:', categoriesToAdd);
+      
+      if (categoriesToAdd.length === 0) {
+        toast.info('No new categories to add');
+        return true;
+      }
+
+      // Add sample thoughts for new categories
+      const thoughtsCount = await addSampleThoughtsForCategories(categoriesToAdd);
+
+      // Update profile with all categories (existing + new)
       const updatedCategories = [...existingCategories, ...categoriesToAdd];
+      console.log('Updating profile with categories:', updatedCategories);
 
-      // Add sample thoughts only for new categories
-      const thoughtsCount = categoriesToAdd.length > 0 
-        ? await addSampleThoughtsForCategories(categoriesToAdd)
-        : 0;
-
-      // Update profile with merged categories
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
@@ -79,19 +82,16 @@ export const useCategoryManagement = () => {
         .eq('user_id', user.id);
 
       if (profileError) {
+        console.error('Error updating profile:', profileError);
         throw profileError;
       }
 
-      // Wait for profile data to be refreshed
+      // Refresh profile to trigger UI update
       await refetch();
 
-      if (categoriesToAdd.length > 0) {
-        toast.success(`🎉 Added ${categoriesToAdd.length} new categories with ${thoughtsCount} sample thoughts!`);
-      } else {
-        toast.info('No new categories to add');
-      }
-      
+      toast.success(`🎉 Added ${categoriesToAdd.length} new categories with ${thoughtsCount} sample thoughts!`);
       return true;
+      
     } catch (error) {
       console.error('Error merging categories:', error);
       toast.error('Failed to update categories. Please try again.');
@@ -108,28 +108,12 @@ export const useCategoryManagement = () => {
     
     try {
       console.log(`Starting deletion of category: ${categoryToRemove}`);
+      console.log('Current categories:', existingCategories);
       
-      // Step 1: Remove category from list
+      // Step 1: Remove category from profile first
       const updatedCategories = existingCategories.filter(cat => cat !== categoryToRemove);
       console.log('Updated categories after removal:', updatedCategories);
 
-      // Step 2: Delete all flashcards for this category
-      console.log('Deleting flashcards...');
-      const { error: deleteError, count } = await supabase
-        .from('flashcards')
-        .delete({ count: 'exact' })
-        .eq('user_id', user.id)
-        .eq('category', categoryToRemove);
-
-      if (deleteError) {
-        console.error('Error deleting flashcards:', deleteError);
-        throw new Error(`Failed to delete flashcards: ${deleteError.message}`);
-      }
-
-      console.log(`Deleted ${count || 0} flashcards for category: ${categoryToRemove}`);
-
-      // Step 3: Update profile with remaining categories
-      console.log('Updating profile with categories:', updatedCategories);
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
@@ -144,12 +128,39 @@ export const useCategoryManagement = () => {
 
       console.log('Profile updated successfully');
 
-      // Step 4: Refresh profile data and let useCategoriesMatrix respond to the change
+      // Step 2: Delete flashcards for this category
+      // Handle both actual category matches AND null categories if user only has one category
+      let deleteQuery = supabase
+        .from('flashcards')
+        .delete({ count: 'exact' })
+        .eq('user_id', user.id);
+
+      // If this is the last category being removed, delete all flashcards
+      // Otherwise, only delete flashcards with matching category
+      if (updatedCategories.length === 0) {
+        console.log('Deleting all flashcards as no categories remain');
+        // Delete all flashcards for this user since no categories remain
+      } else {
+        console.log('Deleting flashcards with category:', categoryToRemove);
+        deleteQuery = deleteQuery.eq('category', categoryToRemove);
+      }
+
+      const { error: deleteError, count } = await deleteQuery;
+
+      if (deleteError) {
+        console.error('Error deleting flashcards:', deleteError);
+        // Don't throw here - profile update was successful
+        console.warn('Profile updated but some flashcards may not have been deleted');
+      } else {
+        console.log(`Deleted ${count || 0} flashcards for category: ${categoryToRemove}`);
+      }
+
+      // Step 3: Refresh profile data to trigger UI updates
       console.log('Refreshing profile data...');
       await refetch();
       console.log('Profile data refreshed');
       
-      toast.success(`Successfully removed "${categoryToRemove}" category and ${count || 0} associated thoughts`);
+      toast.success(`Successfully removed "${categoryToRemove}" category${count ? ` and ${count} associated thoughts` : ''}`);
       return true;
       
     } catch (error) {
