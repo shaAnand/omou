@@ -128,17 +128,22 @@ export const useCategoryManagement = () => {
       console.log(`Deleted ${count || 0} flashcards for category: ${categoryToRemove}`);
 
       // Then, update profile with remaining categories
-      const { error: profileError } = await supabase
+      console.log('Updating profile with categories:', updatedCategories);
+      const { error: profileError, data: profileData } = await supabase
         .from('profiles')
         .update({
           selected_categories: updatedCategories
         })
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .select('selected_categories')
+        .single();
 
       if (profileError) {
         console.error('Error updating profile:', profileError);
         throw new Error(`Failed to update profile: ${profileError.message}`);
       }
+
+      console.log('Profile updated successfully with data:', profileData);
 
       console.log('Profile updated successfully');
 
