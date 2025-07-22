@@ -1,9 +1,12 @@
-import { useEffect } from 'react';
+
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CategoriesMatrix } from '@/components/CategoriesMatrix';
 import { CategoryThoughtsView } from '@/components/CategoryThoughtsView';
+import { CategorySelectionModal } from '@/components/CategorySelectionModal';
 import { UserAvatar } from '@/components/UserAvatar';
 import { useCategoriesMatrix } from '@/hooks/useCategoriesMatrix';
+import { useCategoryManagement } from '@/hooks/useCategoryManagement';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -14,13 +17,17 @@ const Categories = () => {
     loading,
     selectedCategory,
     selectCategory,
-    goBackToMatrix
+    goBackToMatrix,
+    refetch
   } = useCategoriesMatrix();
   
   const { user, loading: authLoading, signOut } = useAuth();
   const { profile, loading: profileLoading } = useProfile();
+  const { updateUserCategories, loading: categoryUpdateLoading } = useCategoryManagement();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  
+  const [showCategorySelection, setShowCategorySelection] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -31,6 +38,19 @@ const Categories = () => {
   const handleSignOut = async () => {
     await signOut();
     navigate('/auth');
+  };
+
+  const handleAddCategories = () => {
+    setShowCategorySelection(true);
+  };
+
+  const handleCategorySelectionComplete = async (selectedCategories: string[]) => {
+    const success = await updateUserCategories(selectedCategories);
+    if (success) {
+      setShowCategorySelection(false);
+      // Refresh the categories data to show the new categories
+      await refetch();
+    }
   };
 
   if (authLoading || profileLoading) {
@@ -79,13 +99,21 @@ const Categories = () => {
               
               <CategoriesMatrix
                 categories={categories}
-                loading={loading}
+                loading={loading || categoryUpdateLoading}
                 onCategorySelect={selectCategory}
+                onAddCategories={handleAddCategories}
               />
             </div>
           )}
         </div>
       </div>
+
+      <CategorySelectionModal
+        open={showCategorySelection}
+        onOpenChange={setShowCategorySelection}
+        onComplete={handleCategorySelectionComplete}
+        initialSelectedCategories={profile?.selected_categories || []}
+      />
     </div>
   );
 };

@@ -1,15 +1,18 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CategoryData } from '@/hooks/useCategoriesMatrix';
 import { formatDistanceToNow } from 'date-fns';
+import { Plus } from 'lucide-react';
 
 interface CategoriesMatrixProps {
   categories: CategoryData[];
   loading: boolean;
   onCategorySelect: (categoryName: string) => void;
+  onAddCategories?: () => void;
 }
 
-export const CategoriesMatrix = ({ categories, loading, onCategorySelect }: CategoriesMatrixProps) => {
+export const CategoriesMatrix = ({ categories, loading, onCategorySelect, onAddCategories }: CategoriesMatrixProps) => {
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -33,11 +36,17 @@ export const CategoriesMatrix = ({ categories, loading, onCategorySelect }: Cate
   if (categories.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="text-6xl mb-4">🤔</div>
+        <div className="text-6xl mb-4">📚</div>
         <h3 className="text-lg font-semibold mb-2">No categories selected</h3>
-        <p className="text-muted-foreground">
-          Complete your onboarding to select categories and start organizing your thoughts.
+        <p className="text-muted-foreground mb-6">
+          Select categories to organize your thoughts and get sample content to get started.
         </p>
+        {onAddCategories && (
+          <Button onClick={onAddCategories} size="lg" className="gap-2">
+            <Plus className="h-4 w-4" />
+            Add Categories
+          </Button>
+        )}
       </div>
     );
   }
@@ -83,6 +92,24 @@ export const CategoriesMatrix = ({ categories, loading, onCategorySelect }: Cate
           </CardContent>
         </Card>
       ))}
+      
+      {/* Add Categories card when categories exist */}
+      {onAddCategories && (
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-shadow duration-200 group border-dashed"
+          onClick={onAddCategories}
+        >
+          <CardContent className="flex flex-col items-center justify-center h-full min-h-[180px] text-center">
+            <Plus className="h-8 w-8 text-muted-foreground group-hover:text-primary transition-colors mb-2" />
+            <h3 className="font-medium text-muted-foreground group-hover:text-primary transition-colors">
+              Add More Categories
+            </h3>
+            <p className="text-xs text-muted-foreground mt-1">
+              Explore new topics
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
