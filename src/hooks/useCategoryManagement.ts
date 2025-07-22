@@ -82,7 +82,7 @@ export const useCategoryManagement = () => {
         throw profileError;
       }
 
-      // Refresh profile data
+      // Wait for profile data to be refreshed
       await refetch();
 
       if (categoriesToAdd.length > 0) {
@@ -105,23 +105,29 @@ export const useCategoryManagement = () => {
     if (!user) return false;
 
     setLoading(true);
+    
     try {
+      console.log(`Starting deletion of category: ${categoryToRemove}`);
+      
       // Remove category from list
       const updatedCategories = existingCategories.filter(cat => cat !== categoryToRemove);
+      console.log('Updated categories after removal:', updatedCategories);
 
-      // Remove all flashcards for this category
-      const { error: deleteError } = await supabase
+      // First, delete all flashcards for this category
+      const { error: deleteError, count } = await supabase
         .from('flashcards')
-        .delete()
+        .delete({ count: 'exact' })
         .eq('user_id', user.id)
         .eq('category', categoryToRemove);
 
       if (deleteError) {
         console.error('Error deleting flashcards:', deleteError);
-        // Continue even if flashcard deletion fails
+        throw new Error(`Failed to delete flashcards: ${deleteError.message}`);
       }
 
-      // Update profile with remaining categories
+      console.log(`Deleted ${count || 0} flashcards for category: ${categoryToRemove}`);
+
+      // Then, update profile with remaining categories
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
@@ -130,17 +136,24 @@ export const useCategoryManagement = () => {
         .eq('user_id', user.id);
 
       if (profileError) {
-        throw profileError;
+        console.error('Error updating profile:', profileError);
+        throw new Error(`Failed to update profile: ${profileError.message}`);
       }
 
-      // Refresh profile data
-      await refetch();
+      console.log('Profile updated successfully');
 
-      toast.success(`Removed "${categoryToRemove}" category and all its thoughts`);
+      // Wait for profile data to be properly refreshed
+      await new Promise(resolve => setTimeout(resolve, 500)); // Brief delay to ensure DB consistency
+      await refetch();
+      
+      console.log('Profile data refetched');
+
+      toast.success(`Successfully removed "${categoryToRemove}" category and ${count || 0} associated thoughts`);
       return true;
+      
     } catch (error) {
       console.error('Error removing category:', error);
-      toast.error('Failed to remove category. Please try again.');
+      toast.error(`Failed to remove category: ${error instanceof Error ? error.message : 'Unknown error'}`);
       return false;
     } finally {
       setLoading(false);

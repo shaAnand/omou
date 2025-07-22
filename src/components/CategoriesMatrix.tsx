@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CategoryData } from '@/hooks/useCategoriesMatrix';
 import { formatDistanceToNow } from 'date-fns';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Loader2 } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +22,7 @@ interface CategoriesMatrixProps {
   onCategorySelect: (categoryName: string) => void;
   onAddCategories?: () => void;
   onDeleteCategory?: (categoryName: string) => void;
+  deletingCategory?: string | null;
 }
 
 export const CategoriesMatrix = ({ 
@@ -29,7 +30,8 @@ export const CategoriesMatrix = ({
   loading, 
   onCategorySelect, 
   onAddCategories,
-  onDeleteCategory 
+  onDeleteCategory,
+  deletingCategory
 }: CategoriesMatrixProps) => {
   if (loading) {
     return (
@@ -85,8 +87,13 @@ export const CategoriesMatrix = ({
                   size="sm"
                   className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground"
                   onClick={(e) => e.stopPropagation()}
+                  disabled={deletingCategory === category.name}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  {deletingCategory === category.name ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -103,8 +110,16 @@ export const CategoriesMatrix = ({
                   <AlertDialogAction
                     onClick={() => onDeleteCategory(category.name)}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    disabled={deletingCategory === category.name}
                   >
-                    Delete
+                    {deletingCategory === category.name ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        Deleting...
+                      </>
+                    ) : (
+                      'Delete'
+                    )}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -112,8 +127,14 @@ export const CategoriesMatrix = ({
           )}
           
           <div 
-            className="cursor-pointer hover:shadow-lg transition-shadow duration-200"
-            onClick={() => onCategorySelect(category.name)}
+            className={`cursor-pointer hover:shadow-lg transition-shadow duration-200 ${
+              deletingCategory === category.name ? 'opacity-50 pointer-events-none' : ''
+            }`}
+            onClick={() => {
+              if (deletingCategory !== category.name) {
+                onCategorySelect(category.name);
+              }
+            }}
           >
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-3">
@@ -121,6 +142,9 @@ export const CategoriesMatrix = ({
                   {category.emoji}
                 </span>
                 <span className="text-lg">{category.name}</span>
+                {deletingCategory === category.name && (
+                  <span className="text-sm text-muted-foreground ml-auto">Deleting...</span>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -141,6 +165,7 @@ export const CategoriesMatrix = ({
                   variant="ghost" 
                   size="sm" 
                   className="w-full mt-3 group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
+                  disabled={deletingCategory === category.name}
                 >
                   View Thoughts
                 </Button>

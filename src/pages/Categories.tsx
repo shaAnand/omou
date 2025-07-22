@@ -28,6 +28,7 @@ const Categories = () => {
   const isMobile = useIsMobile();
   
   const [showCategorySelection, setShowCategorySelection] = useState(false);
+  const [deletingCategory, setDeletingCategory] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -50,18 +51,39 @@ const Categories = () => {
     
     if (success) {
       setShowCategorySelection(false);
-      // Refresh the categories data to show the new categories
-      await refetch();
+      // Wait a moment for database consistency, then refresh
+      setTimeout(async () => {
+        await refetch();
+      }, 600);
     }
   };
 
   const handleDeleteCategory = async (categoryName: string) => {
-    const existingCategories = profile?.selected_categories || [];
-    const success = await removeUserCategory(categoryName, existingCategories);
+    if (deletingCategory) return; // Prevent multiple simultaneous deletions
     
-    if (success) {
-      // Refresh the categories data to show remaining categories
-      await refetch();
+    setDeletingCategory(categoryName);
+    
+    try {
+      console.log(`Attempting to delete category: ${categoryName}`);
+      const existingCategories = profile?.selected_categories || [];
+      const success = await removeUserCategory(categoryName, existingCategories);
+      
+      if (success) {
+        console.log('Category deletion successful, refreshing data...');
+        // Wait for the database operations to complete and profile to update
+        setTimeout(async () => {
+          try {
+            await refetch();
+            console.log('Categories data refreshed after deletion');
+          } catch (refreshError) {
+            console.error('Error refreshing categories after deletion:', refreshError);
+          }
+        }, 800); // Slightly longer delay to ensure DB consistency
+      }
+    } catch (error) {
+      console.error('Error in handleDeleteCategory:', error);
+    } finally {
+      setDeletingCategory(null);
     }
   };
 
@@ -115,6 +137,7 @@ const Categories = () => {
                 onCategorySelect={selectCategory}
                 onAddCategories={handleAddCategories}
                 onDeleteCategory={handleDeleteCategory}
+                deletingCategory={deletingCategory}
               />
             </div>
           )}
