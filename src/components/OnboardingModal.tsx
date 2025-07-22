@@ -5,10 +5,11 @@ import { Button } from '@/components/ui/button';
 import { CategoryCard } from './CategoryCard';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface OnboardingModalProps {
   open: boolean;
-  onComplete: () => void;
+  onComplete: (selectedCategories?: string[]) => void;
 }
 
 const categories = [
@@ -66,18 +67,22 @@ export const OnboardingModal = ({ open, onComplete }: OnboardingModalProps) => {
   const handleComplete = async () => {
     try {
       await addSampleThoughts(selectedCategories);
-      onComplete();
+      toast.success(`🎉 Welcome! Added sample thoughts from ${selectedCategories.length} categories.`);
+      onComplete(selectedCategories);
     } catch (error) {
       console.error('Failed to add sample thoughts:', error);
+      toast.error('Failed to complete onboarding. Please try again.');
     }
   };
 
   const handleSkip = async () => {
     try {
       await addSampleThoughts([]);
-      onComplete();
+      toast.success('🎉 Welcome! You can start creating your own thoughts.');
+      onComplete([]);
     } catch (error) {
       console.error('Failed to complete onboarding:', error);
+      toast.error('Failed to complete onboarding. Please try again.');
     }
   };
 

@@ -22,15 +22,23 @@ const Index = () => {
     }
   }, [user, loading, navigate]);
 
-
   const handleSignOut = async () => {
     await signOut();
     navigate('/auth');
   };
 
-  const handleOnboardingComplete = async () => {
+  const handleOnboardingComplete = async (selectedCategories?: string[]) => {
     // Refresh flashcards after onboarding
     await refetchFlashcards();
+    
+    // Navigate based on whether categories were selected
+    if (selectedCategories && selectedCategories.length > 0) {
+      // If categories were selected, go to categories page
+      navigate('/categories');
+    } else {
+      // If no categories selected (skip), stay on main page to create thoughts
+      // No navigation needed as user is already on the main page
+    }
   };
 
   const showOnboarding = user && profile && !profile.onboarding_completed;
