@@ -114,11 +114,11 @@ export const useCategoriesMatrix = () => {
   const refreshWithProfileSync = useCallback(async () => {
     console.log('useCategoriesMatrix: Refreshing with profile sync');
     // First force refresh the profile
-    forceRefresh();
+    await forceRefresh();
     // Give profile time to update, then fetch categories
     setTimeout(() => {
       fetchCategoriesData();
-    }, 100);
+    }, 300);
   }, [forceRefresh, fetchCategoriesData]);
 
   const selectCategory = (categoryName: string) => {
@@ -135,7 +135,7 @@ export const useCategoriesMatrix = () => {
       userId: user?.id, 
       profileLoading, 
       selectedCategories: profile?.selected_categories,
-      profileLastUpdated: (profile as any)?._lastUpdated
+      profileUpdatedAt: profile?.updated_at
     });
     
     if (user && !profileLoading) {
@@ -147,7 +147,7 @@ export const useCategoriesMatrix = () => {
     // Use JSON.stringify to ensure array changes are detected
     JSON.stringify(profile?.selected_categories || []),
     // Include the profile update timestamp to force refresh
-    (profile as any)?._lastUpdated
+    profile?.updated_at
   ]);
 
   return {
