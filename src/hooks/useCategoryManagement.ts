@@ -88,7 +88,6 @@ export const useCategoryManagement = () => {
       }
 
       // Force refresh profile to ensure UI updates
-      await new Promise(resolve => setTimeout(resolve, 100));
       forceRefresh();
 
       toast.success(`🎉 Added ${categoriesToAdd.length} new categories with ${thoughtsCount} sample thoughts!`);
@@ -146,7 +145,6 @@ export const useCategoryManagement = () => {
       }
 
       // Step 3: Force immediate profile refresh
-      await new Promise(resolve => setTimeout(resolve, 100));
       forceRefresh();
       
       toast.success(`Successfully removed "${categoryToRemove}" category${count ? ` and ${count} associated thoughts` : ''}`);
